@@ -16,6 +16,11 @@
         .risk-color-Low { background-color: #f0fdf4; border-color: #4ade80; color: #166534; }
         .risk-color-default { background-color: #e0f2f1; border-color: #2dd4bf; color: #0f766e; }
 
+        /* لضمان رؤية النتائج حتى عند التمرير */
+        #resultsArea.hidden {
+            display: none;
+        }
+
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -26,7 +31,7 @@
             🛡️ محلل الروابط الأمني الاحترافي
         </h1>
         <p class="text-gray-500 mb-8">
-            قم بإدخال أي رابط للتحقق من سلامته عبر تطبيق أكثر من 40 قاعدة فحص متقدمة.
+            قم بإدخال أي رابط للتحقق من سلامته عبر تطبيق 30 قاعدة فحص متقدمة.
         </p>
 
         <div class="flex flex-col sm:flex-row gap-4 mb-8">
@@ -85,6 +90,17 @@
         const warningsCount = document.getElementById('warningsCount');
         const noViolationsMessage = document.getElementById('noViolationsMessage');
         const apiUrl = '/analyze';
+        
+        // دالة للمرور السلس إلى منطقة النتائج
+        function scrollToResults() {
+            // استخدام getBoundingClientRect يحدد الموضع النسبي للعنصر 
+            const offsetTop = resultsArea.offsetTop;
+            window.scrollTo({
+                top: offsetTop - 20, // تمرير إلى أعلى المنطقة بمسافة بسيطة
+                behavior: 'smooth'
+            });
+        }
+
 
         // دالة لعرض رسالة خطأ أو نجاح
         function showMessage(type, message) {
@@ -146,11 +162,12 @@
 
                 if (!response.ok || result.status.includes('error') || result.status.includes('validation')) {
                     showMessage('error', result.message || 'حدث خطأ غير متوقع أثناء التحليل.');
-                    return;
+                    // إذا كان هناك خطأ، لن يتم عرض النتائج.
+                    return; 
                 }
 
                 // عرض النتائج الرئيسية
-                resultsArea.classList.remove('hidden');
+                resultsArea.classList.remove('hidden'); // إظهار منطقة النتائج
                 updateRiskCardColor(result.risk_score);
                 riskScoreDisplay.textContent = result.risk_score;
                 resultMessageDisplay.textContent = result.result_message;
@@ -181,8 +198,8 @@
 
                 showMessage('success', result.message);
                 
-                // التعديل الذي يضمن رؤية النتائج على الأجهزة الصغيرة
-                window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                // التعديل لضمان رؤية النتائج على الأجهزة الصغيرة
+                scrollToResults();
 
             } catch (error) {
                 console.error("Error during analysis:", error);
