@@ -1,171 +1,138 @@
 import os
 import re
 import requests
-import socket
-import ssl
-import time
+import json
 import base64
-from flask import Flask, request, jsonify, render_template, send_from_directory
+import time
+from flask import Flask, request, jsonify, render_template
 from urllib.parse import urlparse, urljoin
 from validators import url as validate_url
-from datetime import datetime
 
-# إعداد التطبيق - تأكد من وجود مجلدات static و templates
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 
-# إعدادات متصفح احترافية لتجاوز جدران الحماية (Stealth Mode)
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-    "Accept-Language": "ar,en-US;q=0.9,en;q=0.8",
-    "Referer": "https://www.google.com/"
+# إعدادات متقدمة للمحرك
+SENSITIVE_PATTERNS = {
+    "Credential Harvesting": r'(?i)(password|passwd|signin|login|credential|verification)',
+    "Browser Exploitation": r'(?i)(eval\(|unescape\(|document\.write\(|setTimeout\(|setInterval\()',
+    "Data Exfiltration": r'(?i)(XMLHttpRequest|fetch|ajax|\.post\(|\.get\()',
+    "Privacy Violation": r'(?i)(navigator\.mediaDevices|getUserMedia|geolocation|cookie|localStorage)'
 }
 
-def get_domain_age(domain):
-    """فحص عمر النطاق عبر بروتوكول RDAP لكشف المواقع الحديثة جداً"""
-    try:
-        if not domain or '.' not in domain or len(domain) < 3:
-            return None
-        res = requests.get(f"https://rdap.org/domain/{domain}", timeout=5)
-        if res.status_code == 200:
-            data = res.json()
-            events = data.get('events', [])
-            for event in events:
-                if event.get('eventAction') == 'registration':
-                    reg_date_str = event.get('eventDate')
-                    reg_date = datetime.strptime(reg_date_str[:10], "%Y-%m-%d")
-                    return (datetime.now() - reg_date).days
-    except:
-        pass
-    return None
+# قائمة بيضاء ذكية تعتمد على الدومين الأساسي فقط
+WHITELIST_DOMAINS = [
+    'google.com', 'google.com.eg', 'facebook.com', 'youtube.com', 'twitter.com', 
+    'x.com', 'instagram.com', 'linkedin.com', 'microsoft.com', 'apple.com', 
+    'amazon.com', 'github.com', 'vercel.app', 'openai.com', 'cloudflare.com'
+]
 
-def deobfuscate_hidden_logic(content):
-    """فك تشفير النصوص المخفية (Base64) لكشف الأكواد المضللة"""
-    extracted_logic = ""
-    potential_b64 = re.findall(r'["\']([A-Za-z0-9+/]{35,})={0,2}["\']', content)
-    for b in potential_b64:
+def is_trusted(url):
+    domain = urlparse(url).netloc.lower().replace('www.', '')
+    return any(domain == d or domain.endswith('.' + d) for d in WHITELIST_DOMAINS)
+
+def recursive_js_analysis(html, base_url):
+    """تحليل السكربتات بعمق دون الوقوع في فخ النتائج الخاطئة"""
+    findings = []
+    scripts = re.findall(r'<script.*?src=["\'](.*?)["\']', html, re.I)
+    inline_scripts = re.findall(r'<script>(.*?)</script>', html, re.S | re.I)
+    
+    # فحص الأكواد الداخلية أولاً
+    all_js = "\n".join(inline_scripts)
+    
+    # فحص الأكواد الخارجية (بحد أقصى 3 سكربتات لتجنب البطء)
+    for s_url in scripts[:3]:
+        try:
+            full_s_url = urljoin(base_url, s_url)
+            r = requests.get(full_s_url, timeout=3, headers={"User-Agent": "Mozilla/5.0"})
+            if r.status_code == 200:
+                all_js += "\n" + r.text
+        except: continue
+
+    # فحص الـ Base64 Auto-Decoder
+    b64_matches = re.findall(r'["\']([A-Za-z0-9+/]{50,})={0,2}["\']', all_js)
+    for b in b64_matches:
         try:
             decoded = base64.b64decode(b).decode('utf-8', errors='ignore')
-            extracted_logic += " " + decoded
-        except:
-            continue
-    return extracted_logic
+            all_js += "\n" + decoded
+        except: continue
 
-def fetch_and_scan_js(html, base_url):
-    """مطاردة ملفات الـ JavaScript الخارجية وفحص محتواها"""
-    scripts = re.findall(r'<script src=["\'](.*?)["\']', html, re.I)
-    js_payload = ""
-    for s in scripts[:4]:
-        try:
-            full_url = urljoin(base_url, s)
-            r = requests.get(full_url, headers=HEADERS, timeout=4)
-            js_payload += "\n" + r.text
-        except:
-            continue
-    return js_payload
+    return all_js
 
-def perform_ultimate_analysis(target_url):
-    """المحرك الرئيسي لتحليل التهديدات الشامل لبرنامج SecuCode Pro"""
+def perform_deep_scan(url):
     start_time = time.time()
-    violated_rules = []
-    redirect_path = [target_url]
-    risk_points = 0
-    
-    try:
-        session = requests.Session()
-        # تتبع مسار التحويلات بالكامل
-        response = session.get(target_url, headers=HEADERS, timeout=12, allow_redirects=True)
-        final_url = response.url
-        main_html = response.text
-        
-        # تجميع المحتوى للفحص (HTML + JS خارجي + محتوى مفكوك التشفير)
-        extended_js = fetch_and_scan_js(main_html, final_url)
-        full_content = main_html + extended_js
-        full_content += deobfuscate_hidden_logic(full_content)
-
-        # 1. تحليل عمر النطاق
-        domain = urlparse(final_url).netloc
-        age = get_domain_age(domain)
-        if age is not None:
-            if age < 31:
-                risk_points += 55
-                violated_rules.append({"name": "نطاق حديث جداً (خطر عالي)", "risk_description": f"تم إنشاء هذا الموقع منذ {age} يوم فقط. المواقع الجديدة غالباً ما تُستخدم في حملات التصيد السريع."})
-            elif age < 180:
-                risk_points += 25
-                violated_rules.append({"name": "نطاق غير مستقر", "risk_description": "عمر الموقع أقل من 6 أشهر، مما يجعله تحت مجهر المراجعة الأمنية."})
-
-        # 2. كشف الأذونات والخصوصية
-        threat_patterns = {
-            'الكاميرا والميكروفون': r'getUserMedia|mediaDevices|camera|video|microphone|record|stream',
-            'الموقع الجغرافي': r'getCurrentPosition|watchPosition|geolocation',
-            'سحب البيانات': r'canvas\.toDataURL|atob\(|btoa\(|upload|POST|fetch|XMLHttpRequest|base64',
-            'نماذج التصيد': r'password|credit_card|cvv|exp_month|ssn|social_security|pin_code|billing'
-        }
-
-        for category, pattern in threat_patterns.items():
-            if re.search(pattern, full_content, re.I):
-                weight = 75 if 'الكاميرا' in category or 'نماذج' in category else 40
-                risk_points += weight
-                violated_rules.append({
-                    "name": f"نشاط مشبوه: {category}", 
-                    "risk_description": f"تم رصد محاولة برمجية للوصول إلى ({category}) أو سحب بيانات حساسة فور الدخول."
-                })
-
-        # 3. تحليل الروابط والتحويلات
-        if len(response.history) > 2:
-            risk_points += 30
-            violated_rules.append({"name": "سلسلة تحويلات مريبة", "risk_description": f"الرابط قام بالتحويل {len(response.history)} مرات لإخفاء الوجهة النهائية."})
-        
-        for r in response.history:
-            if r.url not in redirect_path: redirect_path.append(r.url)
-        if final_url not in redirect_path: redirect_path.append(final_url)
-
-        # كشف انتحال العلامات التجارية
-        brands = ['facebook', 'google', 'paypal', 'microsoft', 'apple', 'amazon', 'netflix', 'binance', 'instagram']
-        for b in brands:
-            if b in domain.lower() and domain.lower() != f"{b}.com":
-                risk_points += 45
-                violated_rules.append({"name": "اشتباه انتحال علامة تجارية", "risk_description": f"الموقع يستخدم اسم '{b}' في الرابط لخداع المستخدمين بأنه الموقع الرسمي."})
-
-        if not final_url.startswith('https'):
-            risk_points += 50
-            violated_rules.append({"name": "اتصال غير مشفر", "risk_description": "الموقع لا يستخدم بروتوكول HTTPS، مما يعرض خصوصيتك للخطر."})
-
-    except Exception:
-        risk_points += 35
-        violated_rules.append({"name": "نظام حماية ضد الفحص", "risk_description": "الموقع يحظر أدوات الرادار، وهو مؤشر خطر عالي يُستخدم عادةً لإخفاء البرمجيات الضارة."})
-        final_url = target_url
-
-    # النتيجة النهائية وتصنيف الخطر
-    final_score = min(risk_points, 100)
-    risk_label = "Critical" if final_score >= 80 else "High" if final_score >= 50 else "Medium" if final_score >= 25 else "Low"
-
-    return {
-        "risk_score": risk_label,
-        "suspicious_points": final_score,
-        "violated_rules": violated_rules,
-        "link_final": final_url,
-        "redirect_path": redirect_path,
-        "execution_time": round(time.time() - start_time, 2)
+    results = {
+        "risk_score": "Low",
+        "points": 0,
+        "violations": [],
+        "redirects": [url],
+        "final_url": url,
+        "analysis_time": 0
     }
 
+    try:
+        # 1. تتبع التحويلات (Redirection Tracking)
+        session = requests.Session()
+        response = session.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"}, allow_redirects=True)
+        results["final_url"] = response.url
+        results["redirects"] = [r.url for r in response.history] + [response.url]
+        
+        # 2. استثناء المواقع الموثوقة من فحص المحتوى (لتجنب الـ False Positives)
+        if is_trusted(results["final_url"]):
+            results["analysis_time"] = round(time.time() - start_time, 2)
+            return results
+
+        # 3. التحليل السلوكي للمحتوى (Behavioral Analysis)
+        html_content = response.text
+        js_content = recursive_js_analysis(html_content, results["final_url"])
+        full_payload = (html_content + js_content).lower()
+
+        # فحص البروتوكول
+        if not results["final_url"].startswith('https'):
+            results["points"] += 45
+            results["violations"].append({"name": "Unencrypted Connection", "desc": "الموقع يفتقر لتشفير SSL."})
+
+        # فحص الأنماط (Pattern Matching) مع وزن نسبي
+        for threat, pattern in SENSITIVE_PATTERNS.items():
+            if re.search(pattern, full_payload):
+                # لا نحسب النقاط إلا لو كانت مريبة (مثلاً: طلب باسورد في موقع غير مشهور)
+                results["points"] += 25
+                results["violations"].append({"name": f"Suspicious {threat}", "desc": f"تم رصد كود يحاول الوصول إلى ({threat})."})
+
+        # كشف انتحال العلامات التجارية (Typosquatting)
+        domain = urlparse(results["final_url"]).netloc.lower()
+        brands = ['google', 'facebook', 'paypal', 'bank', 'secure']
+        for b in brands:
+            if b in domain and not is_trusted(results["final_url"]):
+                results["points"] += 60
+                results["violations"].append({"name": "Brand Impersonation", "desc": f"اشتباه في محاولة تقليد العلامة التجارية '{b}'."})
+
+    except Exception as e:
+        results["risk_score"] = "Unknown"
+        results["violations"].append({"name": "Scan Blocked", "desc": "الموقع يحظر أدوات التحليل أو غير متاح حالياً."})
+
+    # النتيجة النهائية (Logic Gate)
+    score = min(results["points"], 100)
+    results["points"] = score
+    if score >= 80: results["risk_score"] = "Critical"
+    elif score >= 50: results["risk_score"] = "High"
+    elif score >= 25: results["risk_score"] = "Medium"
+    else: results["risk_score"] = "Low"
+
+    results["analysis_time"] = round(time.time() - start_time, 2)
+    return results
+
 @app.route('/')
-def home():
+def index():
     return render_template('index.html')
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    url = request.json.get('link', '').strip()
-    if not url: return jsonify({"message": "يرجى إدخال الرابط"}), 400
+    data = request.json
+    url = data.get('link', '').strip()
     if not url.startswith('http'): url = 'https://' + url
-    if not validate_url(url): return jsonify({"message": "الرابط غير صالح"}), 400
-    return jsonify(perform_ultimate_analysis(url))
-
-@app.route('/robots.txt')
-def robots(): return send_from_directory(app.static_folder, 'robots.txt')
-
-@app.route('/sitemap.xml')
-def sitemap(): return send_from_directory(app.static_folder, 'sitemap.xml')
+    if not validate_url(url): return jsonify({"error": "رابط غير صالح"}), 400
+    
+    return jsonify(perform_deep_scan(url))
 
 if __name__ == '__main__':
     app.run(debug=True)
+
