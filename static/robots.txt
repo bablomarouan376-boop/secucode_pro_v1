@@ -1,15 +1,3 @@
-SecuCode Pro - Robots.txt Configuration
-Developed by Tarek Mostafa
-Optimized for Google and Security Scanners
 User-agent: *
-السماح بزيارة الصفحة الرئيسية والمجلدات الثابتة
 Allow: /
-Allow: /static/
-Allow: /templates/
-منع الأرشفة لعمليات الفحص المباشرة لتوفير موارد السيرفر
-Disallow: /analyze
-Disallow: /api/
-إخبار المحركات بمكان خريطة الموقع
-Sitemap: https://www.google.com/search?q=https://secu-code-pro.vercel.app/sitemap.xml
-تحسين ميزانية الزحف (Crawl-delay) للمحركات البطيئة
-Crawl-delay: 10
+Sitemap: https://secu-code-pro.vercel.app/sitemap.xml
