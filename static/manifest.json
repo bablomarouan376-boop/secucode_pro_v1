@@ -1,16 +1,11 @@
 {
   "short_name": "SecuCode",
-  "name": "SecuCode Pro - Security Scanner",
-  "description": "أداة فحص الروابط والتحليل السلوكي المتقدم للكشف عن التهديدات الرقمية.",
+  "name": "SecuCode Pro - Tarek Mostafa",
+  "description": "أداة طارق مصطفى لفحص أمان الروابط والتحليل السلوكي.",
   "icons": [
     {
-      "src": "https://secu-code-pro.vercel.app/static/icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "https://secu-code-pro.vercel.app/static/icon-512.png",
-      "type": "image/png",
+      "src": "https://img.freepik.com/premium-vector/low-poly-shield-with-checkmark-cybersecurity-concept-digital-protection-blue-geometric-3d-design_145776-164385.jpg",
+      "type": "image/jpg",
       "sizes": "512x512"
     }
   ],
