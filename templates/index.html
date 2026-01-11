@@ -3,140 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecuCode Pro | طارق مصطفى - حماية متكاملة</title>
-    
-    <link rel="canonical" href="https://secu-code-pro.vercel.app/">
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="description" content="نظام طارق مصطفى المتطور لتحليل الروابط وكشف التهديدات الأمنية بدقة عالية.">
-
-    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.300.0/dist/umd/lucide.min.js" defer></script>
-
+    <title>SecuCode Pro | طارق مصطفى</title>
+    <link rel="manifest" href="/manifest.json">
     <style>
-        :root { --primary: #3b82f6; --bg: #020617; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #fff; margin: 0; overflow-x: hidden; }
-        
-        /* تصميم خلفية زجاجية متحركة لزيادة الاحترافية */
-        .animated-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 20% 30%, #1e3a8a 0%, transparent 40%),
-                        radial-gradient(circle at 80% 70%, #1e40af 0%, transparent 40%);
-            filter: blur(80px); opacity: 0.5;
+        :root { --primary: #3b82f6; --bg: #020617; --glass: rgba(30, 41, 59, 0.7); }
+        * { box-sizing: border-box; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); color: white; margin: 0; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            background-image: radial-gradient(circle at top, #1e40af 0%, #020617 80%);
         }
-
+        .container { width: 90%; max-width: 750px; text-align: center; }
         .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 2rem;
-            transition: all 0.3s ease;
+            background: var(--glass); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 2.5rem;
+            padding: 3rem; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
-
-        .input-box {
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(59, 130, 246, 0.2);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 900; margin: 0; }
+        .input-group {
+            margin-top: 2.5rem; display: flex; background: rgba(0,0,0,0.4); 
+            padding: 0.5rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.1);
         }
-
-        .input-box:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
-            transform: scale(1.01);
+        input {
+            flex: 1; background: transparent; border: none; color: white;
+            padding: 1rem; font-size: 1.1rem; outline: none;
         }
-
-        .btn-shine {
-            background: linear-gradient(45deg, #2563eb, #3b82f6);
-            position: relative; overflow: hidden;
+        button {
+            background: var(--primary); color: white; border: none;
+            padding: 1rem 2rem; border-radius: 1.2rem; font-weight: 900;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
         }
-
-        .btn-shine::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: rgba(255,255,255,0.1); transform: rotate(45deg); transition: 0.5s;
+        button:hover { transform: translateY(-3px); background: #2563eb; }
+        .results { 
+            margin-top: 2.5rem; display: none; padding-top: 2rem; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
         }
-
-        .btn-shine:hover::after { left: 120%; }
-
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-content { animation: slideUp 0.8s ease-out; }
+        .score { font-size: 4rem; font-weight: 900; color: var(--primary); }
+        footer { margin-top: 3rem; color: #475569; font-weight: bold; font-size: 0.8rem; letter-spacing: 2px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-6">
-    <div class="animated-bg"></div>
-
-    <main class="w-full max-w-4xl animate-content">
-        <header class="text-center mb-16">
-            <div class="inline-flex items-center gap-2 px-4 py-2 mb-6 glass-card text-blue-400 text-xs font-black tracking-widest uppercase">
-                <i data-lucide="shield-check" class="w-4 h-4"></i> SecuCode Pro v2.0
+<body>
+    <div class="container">
+        <div class="glass-card">
+            <div style="color:var(--primary); font-weight:bold; font-size:0.7rem; margin-bottom:1rem; letter-spacing:2px;">SECUCODE PRO V2.0</div>
+            <h1>طارق مصطفى<span style="color:var(--primary)">.</span></h1>
+            <p style="color:#94a3b8;">نظام الفحص الأمني الذكي لتحليل الروابط.</p>
+            
+            <div class="input-group">
+                <input type="url" id="urlInput" placeholder="أدخل الرابط للفحص الفوري...">
+                <button onclick="startScan()" id="btn">ابدأ الفحص</button>
             </div>
-            <h1 class="text-6xl md:text-8xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-500">
-                طارق مصطفى<span class="text-blue-500">.</span>
-            </h1>
-            <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto">نظام الفحص الأمني السحابي الأسرع والأكثر دقة في تحليل الروابط المريبة.</p>
-        </header>
 
-        <section class="mb-20">
-            <div class="glass-card p-4 input-box">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <input type="url" id="urlInput" placeholder="أدخل الرابط المراد تحليله الآن..." 
-                           class="flex-1 bg-transparent px-6 py-5 outline-none text-xl font-medium placeholder:text-slate-600">
-                    <button onclick="handleScan()" id="scanBtn" class="btn-shine px-12 py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-3">
-                        <span id="btnText">فحص الآن</span>
-                        <i data-lucide="zap" class="w-6 h-6" id="btnIcon"></i>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <div id="resultsArea" class="hidden glass-card p-10 space-y-8">
-            <div class="flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-8 gap-8">
-                <div>
-                    <h2 id="riskStatus" class="text-5xl font-black mb-4">--</h2>
-                    <p id="riskDesc" class="text-slate-400 max-w-md"></p>
-                </div>
-                <div class="text-7xl font-black text-blue-500" id="riskScore">00</div>
+            <div id="resultArea" class="results">
+                <div id="scoreNum" class="score">00</div>
+                <h2 id="riskText" style="margin:0;">تحليل آمن</h2>
+                <p id="analysisInfo" style="color:#94a3b8; font-size:0.9rem; margin-top:1rem;"></p>
             </div>
         </div>
-    </main>
-
-    <footer class="mt-20 text-slate-500 font-bold text-sm tracking-widest uppercase">
-        Designed & Coded by <span class="text-white">Tarek Mostafa</span>
-    </footer>
+        <footer>DESIGNED BY TAREK MOSTAFA</footer>
+    </div>
 
     <script>
-        function handleScan() {
-            const btn = document.getElementById('scanBtn');
-            const icon = document.getElementById('btnIcon');
-            const text = document.getElementById('btnText');
-            const input = document.getElementById('urlInput');
+        async function startScan() {
+            const val = document.getElementById('urlInput').value;
+            const btn = document.getElementById('btn');
+            if(!val) return alert("يرجى إدخال رابط");
 
-            if(!input.value) return;
-
-            btn.classList.add('opacity-50', 'pointer-events-none');
-            text.textContent = "جاري التحليل...";
+            btn.innerText = "جاري الفحص...";
+            btn.style.opacity = "0.5";
             
-            // محاكاة الفحص (يجب ربطها بـ API الخاص بك)
-            setTimeout(() => {
-                document.getElementById('resultsArea').classList.remove('hidden');
-                document.getElementById('riskStatus').textContent = "آمن";
-                document.getElementById('riskStatus').className = "text-5xl font-black text-green-500";
-                document.getElementById('riskScore').textContent = "98";
-                document.getElementById('riskDesc').textContent = "لم يتم العثور على أي تهديدات برمجية أو سلوك احتيالي في هذا الرابط.";
+            try {
+                const res = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({link: val})
+                });
+                const d = await res.json();
                 
-                btn.classList.remove('opacity-50', 'pointer-events-none');
-                text.textContent = "فحص الآن";
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                lucide.createIcons();
-            }, 1500);
+                document.getElementById('resultArea').style.display = "block";
+                const scoreEl = document.getElementById('scoreNum');
+                scoreEl.innerText = d.points;
+                document.getElementById('riskText').innerText = d.risk_score;
+                
+                const isSafe = d.points < 25;
+                scoreEl.style.color = isSafe ? "#22c55e" : "#ef4444";
+                document.getElementById('riskText').style.color = isSafe ? "#22c55e" : "#ef4444";
+                document.getElementById('analysisInfo').innerText = "تم إكمال التحليل في " + d.analysis_time + " ثانية.";
+            } catch(e) { alert("خطأ في الاتصال بالسيرفر"); }
+            
+            btn.innerText = "ابدأ الفحص";
+            btn.style.opacity = "1";
         }
-        
-        // تشغيل الأيقونات فور التحميل
-        window.addEventListener('load', () => lucide.createIcons());
     </script>
 </body>
 </html>
