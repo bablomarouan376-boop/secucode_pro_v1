@@ -1,13 +1,8 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "app.py", "use": "@vercel/python" }
-  ],
   "routes": [
     { "src": "/static/(.*)", "dest": "/static/$1" },
     { "src": "/manifest.json", "dest": "/static/manifest.json" },
-    { "src": "/sitemap.xml", "dest": "/static/sitemap.xml" },
-    { "src": "/robots.txt", "dest": "/static/robots.txt" },
     { "src": "/(.*)", "dest": "app.py" }
   ]
 }
