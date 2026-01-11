@@ -1,3 +1,9 @@
 User-agent: *
 Allow: /
-Sitemap: https://secu-code-pro.vercel.app/sitemap.xml
+Allow: /static/
+
+# منع الزحف إلى ملفات النظام الداخلية إذا وجدت
+Disallow: /__pycache__/
+Disallow: /.env
+
+Sitemap: https://secu-code-pro.vercel.app/static/sitemap.xml
