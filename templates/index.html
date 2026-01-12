@@ -1,126 +1,78 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="htmlTag">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SecuCode Pro - نظام طارق مصطفى المتقدم لفحص أمان الروابط وكشف اختراق الكاميرا والتصيد الاحتيالي 2026.">
-    <title>SecuCode Pro | رادار طارق مصطفى</title>
-    
+    <title>SecuCode Pro | Tarek Mostafa</title>
+    <meta name="description" content="نظام طارق مصطفى المتطور لفحص أمان الروابط 2026.">
     <link rel="manifest" href="/manifest.json">
-    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/9446/9446698.png">
-
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
     <script src="https://cdn.tailwindcss.com/3.4.1"></script>
-    <script src="https://unpkg.com/lucide@0.300.0/dist/umd/lucide.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.300.0/dist/umd/lucide.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    
     <style>
-        :root { --accent: #2563eb; --bg: #020617; }
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: white; margin: 0; overflow-x: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.05); border-radius: 1.5rem; }
-        .scan-line { position: absolute; height: 2px; width: 100%; background: var(--accent); box-shadow: 0 0 20px var(--accent); animation: scan 2s linear infinite; z-index: 20; }
+        body { font-family: 'Cairo', sans-serif; background: #020617; color: white; margin: 0; }
+        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .scan-line { position: absolute; height: 3px; width: 100%; background: #3b82f6; box-shadow: 0 0 15px #3b82f6; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-        .stat-card { border-bottom: 2px solid rgba(37, 99, 235, 0.2); transition: all 0.3s ease; }
-        .stat-card:hover { border-bottom-color: var(--accent); background: rgba(37, 99, 235, 0.05); }
-        input::placeholder { color: #475569; }
+        /* تحسين التباين للأرشفة */
+        .text-custom-gray { color: #cbd5e1 !important; }
+        .stat-card { min-height: 110px; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-12">
+<body class="p-4 md:p-12 min-h-screen relative">
     <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#0f172a,_#020617)]"></div>
-
     <main class="max-w-4xl mx-auto">
-        <header class="flex justify-between items-start mb-12">
-            <div class="text-right">
-                <h1 class="text-5xl md:text-6xl font-black italic tracking-tighter uppercase">
-                    SecuCode <span class="text-blue-500">Pro</span>
-                </h1>
-                <p id="subTitle" class="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase mt-2">
-                    نظام طارق مصطفى للرصد الاستخباراتي - 2026
-                </p>
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h1 class="text-5xl font-black italic text-white uppercase">SecuCode <span class="text-blue-500">Pro</span></h1>
+                <p class="text-[11px] font-bold text-custom-gray tracking-widest uppercase mt-2">نظام طارق مصطفى الاستخباراتي - 2026</p>
             </div>
-            <button onclick="toggleLang()" class="glass px-4 py-2 text-[10px] font-bold hover:bg-blue-600/20 transition-all">EN / AR</button>
+            <button class="glass px-5 py-2 text-xs font-bold rounded-full border border-white/20">AR / EN</button>
         </header>
 
-        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 text-center">
-            <div class="glass p-5 stat-card">
-                <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Total Scans</p>
-                <p id="totalScanned" class="text-2xl font-black text-blue-500 font-mono">---</p>
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div class="glass p-5 rounded-3xl text-center stat-card border-b-4 border-blue-500/50">
+                <span class="text-[10px] font-bold text-custom-gray uppercase">Total Scans</span>
+                <p id="totalScanned" class="text-2xl font-black text-blue-500 mt-2 font-mono">1,540</p>
             </div>
-            <div class="glass p-5 stat-card">
-                <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Threats Caught</p>
-                <p id="threatsDetected" class="text-2xl font-black text-red-500 font-mono">---</p>
+            <div class="glass p-5 rounded-3xl text-center stat-card border-b-4 border-red-500/50">
+                <span class="text-[10px] font-bold text-custom-gray uppercase">Threats Found</span>
+                <p id="threatsDetected" class="text-2xl font-black text-red-500 mt-2 font-mono">208</p>
             </div>
-            <div class="glass p-5 stat-card">
-                <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Engine Load</p>
-                <p class="text-2xl font-black text-green-500 font-mono">0.02s</p>
+            <div class="glass p-5 rounded-3xl text-center stat-card border-b-4 border-green-500/50">
+                <span class="text-[10px] font-bold text-custom-gray uppercase">Success Rate</span>
+                <p class="text-2xl font-black text-green-500 mt-2 font-mono">100%</p>
             </div>
-            <div class="glass p-5 stat-card">
-                <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Database</p>
-                <p class="text-[10px] font-black text-purple-400 uppercase mt-2 italic">Global Sync</p>
+            <div class="glass p-5 rounded-3xl text-center stat-card border-b-4 border-purple-500/50">
+                <span class="text-[10px] font-bold text-custom-gray uppercase">Security DB</span>
+                <p class="text-[10px] font-black text-purple-400 mt-4 uppercase">Live Sync</p>
             </div>
         </section>
 
-        <div class="glass p-3 flex flex-col md:flex-row gap-3 mb-16 relative overflow-hidden group">
+        <div class="glass p-3 flex flex-col md:flex-row gap-3 rounded-3xl mb-12 relative overflow-hidden">
             <div id="scanLine" class="hidden scan-line"></div>
-            <input type="url" id="urlInput" placeholder="أدخل الرابط المراد فحصه بالكامل..." 
-                   class="w-full bg-slate-900/40 rounded-xl px-5 py-4 outline-none border border-white/5 focus:border-blue-500/40 font-bold transition-all">
-            <button onclick="startScan()" id="scanBtn" 
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl font-black flex items-center justify-center gap-2 transition-all active:scale-95">
-                <i data-lucide="shield-search" class="w-5 h-5"></i>
-                <span id="scanBtnText">تحليل الوجهة</span>
+            <input type="url" id="urlInput" placeholder="أدخل الرابط المراد تحليله..." class="w-full bg-transparent px-6 py-5 outline-none font-bold text-lg text-white">
+            <button onclick="startScan()" id="scanBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-5 rounded-2xl font-black text-lg transition-all flex items-center justify-center gap-2">
+                <i data-lucide="shield-check"></i> <span>فحص</span>
             </button>
         </div>
 
-        <div id="resultsArea" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div id="statusCard" class="glass p-8 border-r-8 transition-all duration-500 shadow-2xl">
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-widest">Security Report</p>
-                        <h2 id="riskStatus" class="text-5xl font-black italic uppercase">--</h2>
-                    </div>
-                    <div class="text-right">
-                        <p id="riskScore" class="text-5xl font-black font-mono">0</p>
-                        <p class="text-[10px] font-bold text-slate-500 uppercase">Risk Score</p>
-                    </div>
-                </div>
-                <div id="violationsList" class="space-y-3"></div>
-            </div>
-        </div>
+        <div id="resultsArea" class="hidden animate-in fade-in duration-700"></div>
     </main>
 
-    <footer class="mt-20 text-center opacity-30 text-[9px] font-bold tracking-widest uppercase">
-        &copy; 2026 SecuCode Pro - Optimized for Tarek Mostafa
+    <footer class="mt-20 text-center py-10 border-t border-white/5">
+        <p class="text-custom-gray text-[10px] font-bold tracking-[0.3em] uppercase">&copy; 2026 SECUCODE PRO - OPTIMIZED BY TAREK MOSTAFA</p>
     </footer>
 
     <script>
-        lucide.createIcons();
-        let lang = 'ar';
-        const dict = {
-            ar: { sub: "نظام طارق مصطفى للرصد الاستخباراتي - 2026", placeholder: "أدخل الرابط المراد فحصه بالكامل...", scan: "تحليل الوجهة", scanning: "جاري الفحص..." },
-            en: { sub: "Tarek Mostafa Threat Intelligence - 2026", placeholder: "Enter full target URL...", scan: "Start Analysis", scanning: "Analyzing..." }
-        };
-
-        function toggleLang() {
-            lang = lang === 'ar' ? 'en' : 'ar';
-            document.getElementById('htmlTag').dir = lang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('subTitle').textContent = dict[lang].sub;
-            document.getElementById('urlInput').placeholder = dict[lang].placeholder;
-            document.getElementById('scanBtnText').textContent = dict[lang].scan;
-        }
-
+        window.addEventListener('load', () => { if(window.lucide) lucide.createIcons(); });
         async function startScan() {
-            const urlInput = document.getElementById('urlInput');
-            const url = urlInput.value.trim();
+            const url = document.getElementById('urlInput').value.trim();
             if(!url) return;
-
             const btn = document.getElementById('scanBtn');
             const line = document.getElementById('scanLine');
-            
-            btn.disabled = true;
-            btn.classList.add('opacity-50');
-            document.getElementById('scanBtnText').textContent = dict[lang].scanning;
-            line.classList.remove('hidden');
-
+            btn.disabled = true; line.classList.remove('hidden');
             try {
                 const res = await fetch('/analyze', {
                     method: 'POST',
@@ -129,43 +81,23 @@
                 });
                 const data = await res.json();
                 renderUI(data);
-            } catch (e) { 
-                alert("خطأ في الاتصال بالسيرفر. تأكد من رفع app.py بشكل صحيح."); 
-            } finally {
-                btn.disabled = false;
-                btn.classList.remove('opacity-50');
-                document.getElementById('scanBtnText').textContent = dict[lang].scan;
-                line.classList.add('hidden');
-            }
+            } catch (e) { alert("Server Error"); }
+            finally { btn.disabled = false; line.classList.add('hidden'); }
         }
-
         function renderUI(data) {
-            document.getElementById('resultsArea').classList.remove('hidden');
-            
-            // تحديث الإحصائيات من السيرفر
+            const area = document.getElementById('resultsArea');
+            area.classList.remove('hidden');
             document.getElementById('totalScanned').textContent = data.stats.total.toLocaleString();
             document.getElementById('threatsDetected').textContent = data.stats.threats.toLocaleString();
-            
-            const color = data.risk_score === 'Critical' ? '#ef4444' : (data.risk_score === 'High' ? '#f97316' : '#22c55e');
-            const riskText = document.getElementById('riskStatus');
-            
-            riskText.textContent = data.risk_score;
-            riskText.style.color = color;
-            document.getElementById('statusCard').style.borderColor = color;
-            document.getElementById('riskScore').textContent = data.points;
-            document.getElementById('riskScore').style.color = color;
-            
-            document.getElementById('violationsList').innerHTML = data.violations.map(v => `
-                <div class="bg-slate-900/60 border border-white/5 p-5 rounded-2xl flex items-center gap-5 transition-all hover:bg-slate-900/80">
-                    <div class="p-3 rounded-xl bg-slate-800"><i data-lucide="alert-octagon" style="color: ${color}"></i></div>
-                    <div>
-                        <h4 class="font-bold text-sm" style="color: ${color}">${v.name}</h4>
-                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">${v.desc}</p>
-                    </div>
-                </div>`).join('');
-            
+            const color = data.risk_score === 'Critical' ? '#ef4444' : '#22c55e';
+            area.innerHTML = `<div class="glass p-10 rounded-[2rem] border-r-8" style="border-color: ${color}">
+                <div class="flex justify-between items-center">
+                    <div><p class="text-xs font-bold text-custom-gray uppercase">Analysis Result</p><h2 class="text-5xl font-black italic" style="color:${color}">${data.risk_score}</h2></div>
+                    <div class="text-right"><p class="text-5xl font-black" style="color:${color}">${data.points}</p><p class="text-xs font-bold text-custom-gray uppercase">Risk Index</p></div>
+                </div>
+                <div class="mt-6 space-y-3">${data.violations.map(v => `<div class="bg-white/5 p-4 rounded-xl text-sm font-bold border border-white/5">${v.name}: <span class="text-custom-gray font-normal">${v.desc}</span></div>`).join('')}</div>
+            </div>`;
             lucide.createIcons();
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
     </script>
 </body>
