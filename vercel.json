@@ -7,25 +7,10 @@
     }
   ],
   "routes": [
-    {
-      "src": "/robots.txt",
-      "dest": "/static/robots.txt"
-    },
-    {
-      "src": "/sitemap.xml",
-      "dest": "/static/sitemap.xml"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/static/manifest.json"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "app.py"
-    }
+    { "src": "/robots.txt", "dest": "/robots.txt" },
+    { "src": "/sitemap.xml", "dest": "/sitemap.xml" },
+    { "src": "/manifest.json", "dest": "/manifest.json" },
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/(.*)", "dest": "app.py" }
   ]
 }
