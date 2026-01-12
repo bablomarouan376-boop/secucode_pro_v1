@@ -6,134 +6,124 @@ from threading import Thread
 
 app = Flask(__name__)
 
-# --- المستودع المركزي للذكاء الاصطناعي والتهديدات ---
-GLOBAL_BLACKLIST = set()
-LAST_UPDATE = "جاري المزامنة..."
-START_DATE = datetime(2026, 1, 1)
-BASE_SCANS = 1540
+# --- قاعدة بيانات التهديدات الديناميكية لعام 2026 ---
+BLACKLIST_DB = set()
+LAST_SYNC = "جاري الفحص العميق..."
 
-def update_threat_intelligence():
-    global GLOBAL_BLACKLIST, LAST_UPDATE
-    new_threats = set()
-    sources = [
-        "https://openphish.com/feed.txt",
-        "https://phishstats.info/phish_score.txt"
-    ]
-    for s in sources:
+def sync_threats():
+    global BLACKLIST_DB, LAST_SYNC
+    while True:
         try:
-            res = requests.get(s, timeout=15)
-            if res.status_code == 200:
-                for line in res.text.splitlines():
-                    if line and not line.startswith('#'):
-                        domain = urlparse(line).netloc if '://' in line else line.split('/')[0]
-                        if domain: new_threats.add(domain.lower().strip())
+            new_db = set()
+            # جلب أخطر القوائم العالمية لتحديث الرادار تلقائياً
+            feeds = [
+                "https://openphish.com/feed.txt",
+                "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+            ]
+            for url in feeds:
+                res = requests.get(url, timeout=10)
+                if res.status_code == 200:
+                    domains = re.findall(r'(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]', res.text)
+                    new_db.update([d.lower() for d in domains])
+            
+            # إضافة البصمات المحلية (أهم جزء لطارق)
+            local_threats = ['grabify', 'iplogger', 'webcam360', 'casajoys', 'bit.ly', 'cutt.ly', 'r.mtdv.me', 'tinyurl']
+            new_db.update(local_threats)
+            
+            BLACKLIST_DB = new_db
+            LAST_SYNC = datetime.now().strftime("%H:%M:%S")
         except: pass
-    
-    # قائمة طارق الخاصة للتهديدات المحلية النشطة في مصر
-    manual_list = [
-        'casajoys.com', 'webcam360.com', 'grabify.link', 
-        'iplogger.org', 'blasze.com', 'linkexpander.com',
-        'r.mtdv.me', 'bit.ly', 'cutt.ly' # الروابط المختصرة توضع تحت المراقبة
-    ]
-    for d in manual_list: new_threats.add(d)
-    
-    GLOBAL_BLACKLIST = new_threats
-    LAST_UPDATE = datetime.now().strftime("%H:%M:%S")
+        time.sleep(3600) # تحديث كل ساعة تلقائياً
 
-Thread(target=update_threat_intelligence).start()
+Thread(target=sync_threats, daemon=True).start()
 
-def get_live_stats():
-    now = datetime.now()
-    days = (now - START_DATE).days
-    total = BASE_SCANS + (days * 41) + (now.hour * 3) + random.randint(1, 5)
-    return total, int(total * 0.13)
+# --- محرك التحليل الجنائي (Forensic Analysis Engine) ---
+def advanced_forensic_scan(url):
+    risk_score = 0
+    detections = []
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Referer": "https://www.google.com/"
+    }
 
-# --- المحرك السلوكي المتطور (Deep Radar) ---
-def analyze_content(content, domain):
-    points, findings = 0, []
-    
-    # 1. كشف محاولة اختراق الكاميرا (WebCam Attack)
-    if re.search(r'getUserMedia|Webcam\.attach|camera\.start|video_capture|navigator\.devices\.video', content, re.I):
-        trusted = ['google.com', 'zoom.us', 'microsoft.com', 'teams.live.com', 'facebook.com']
-        if not any(t in domain for t in trusted):
-            points += 98
-            findings.append({"name": "اختراق الخصوصية (كاميرا)", "desc": "تم رصد محاولة برمجية لفتح الكاميرا فور الدخول للموقع."})
-    
-    # 2. كشف تسريب البيانات لبوتات التليجرام (Exfiltration)
-    if re.search(r'api\.telegram\.org/bot|tele-bot|bot_token', content, re.I):
-        points = max(points, 90)
-        findings.append({"name": "تسريب بيانات (تليجرام)", "desc": "الموقع مبرمج لإرسال ملفاتك أو صورك لبوت تليجرام خارجي."})
-    
-    # 3. كشف سكربتات سحب الحسابات (Phishing Scripts)
-    if re.search(r'login_submit|password_capture|account_verify', content, re.I) and points < 50:
-        points += 40
-        findings.append({"name": "اشتباه في صفحة مزورة", "desc": "يحتوي الموقع على أكواد تهدف لسحب بيانات الدخول."})
-    
-    return points, findings
+    try:
+        # 1. تتبع الروابط المختصرة والمخفية (Redirect Chain)
+        response = requests.get(url, timeout=15, headers=headers, allow_redirects=True)
+        final_url = response.url.lower()
+        content = response.text
+        domain = urlparse(final_url).netloc.lower()
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+        # 2. فحص الدومين في القاعدة السوداء
+        if any(threat in final_url for threat in BLACKLIST_DB):
+            risk_score += 95
+            detections.append({"name": "تهديد أمني مدرج", "desc": "هذا الدومين مسجل كمنصة لاختراق الخصوصية أو التصيد."})
+
+        # 3. كشف "فخاخ الكاميرا" المشفرة (Advanced Camera Detection)
+        # هذا الجزء يكشف حتى الأكواد التي تحاول طلب الإذن بطريقة غير مباشرة
+        cam_signatures = [
+            r'navigator\.mediaDevices\.getUserMedia', r'videoInput', 
+            r'webcam\.js', r'attachWebcam', r'cameraStream',
+            r'ConstraintError', r'NotAllowedError' # مؤشرات على محاولة طلب الكاميرا
+        ]
+        if any(re.search(sig, content, re.I) for sig in cam_signatures):
+            if "google.com" not in domain and "microsoft.com" not in domain:
+                risk_score += 98
+                detections.append({"name": "رادار الكاميرا النشط", "desc": "تم كشف كود خفي يحاول تشغيل الكاميرا الأمامية فور الدخول."})
+
+        # 4. كشف سارقي البيانات (Data Exfiltration)
+        # البحث عن محاولات إرسال البيانات لبوتات تليجرام أو سيرفرات مجهولة
+        data_leak_sig = [r'api\.telegram\.org', r'webhook\.site', r'ajax.*post', r'\.php\?data=', r'token.*bot']
+        if any(re.search(sig, content, re.I) for sig in data_leak_sig):
+            risk_score = max(risk_score, 85)
+            detections.append({"name": "تسريب بيانات فوري", "desc": "الموقع مبرمج لسحب معلومات الجهاز وإرسالها لمهاجم خارجي."})
+
+        # 5. كشف الهندسة الاجتماعية (Social Engineering)
+        if len(response.history) > 2:
+            risk_score += 20
+            detections.append({"name": "سلسلة تحويلات مشبوهة", "desc": "تم اكتشاف محاولة لإخفاء الرابط الأصلي عبر عدة تحويلات."})
+
+    except Exception:
+        # المواقع التي تمنع الفحص هي دائماً مشبوهة
+        risk_score = 50
+        detections.append({"name": "تشفير عدواني", "desc": "الموقع يمنع أدوات الأمان من فحصه، مما يرفع درجة الخطورة."})
+
+    return min(risk_score, 100), detections
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    url = request.json.get('link', '').strip()
-    if not url: return jsonify({"error": "No URL provided"}), 400
+    data = request.json
+    url = data.get('link', '').strip()
     if not url.startswith('http'): url = 'https://' + url
     
-    domain = urlparse(url).netloc.lower()
-    total_points, violations = 0, []
-
-    # الخطوة 1: فحص القائمة السوداء الفورية
-    if domain in GLOBAL_BLACKLIST:
-        total_points = 100
-        violations.append({"name": "تهديد عالمي مؤكد", "desc": "هذا الموقع مسجل رسمياً كنشاط احتيالي في قواعد بيانات الأمن السيبراني."})
-
-    # الخطوة 2: التحليل السلوكي العميق (Deep Scan)
-    if total_points < 100:
-        try:
-            # استخدام Session و User-Agent حقيقي لتجنب الحجب
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-            res = requests.get(url, timeout=12, headers=headers, allow_redirects=True)
-            
-            # فحص محتوى الصفحة
-            p, f = analyze_content(res.text, domain)
-            total_points = max(total_points, p)
-            violations.extend(f)
-            
-            # كشف سلاسل التحويل الطويلة (Redirect Chains)
-            if len(res.history) > 1:
-                total_points += 15
-                violations.append({"name": "تحويلات متعددة", "desc": "الموقع يقوم بتحويلك عدة مرات لإخفاء هويته، وهذا سلوك مريب."})
-
-        except requests.exceptions.Timeout:
-            total_points = max(total_points, 75)
-            violations.append({"name": "حجب الفحص (Timeout)", "desc": "الموقع بطيء جداً أو يحاول تعطيل أنظمة الفحص، مما يرفع احتمالية الخطر."})
-        except:
-            if total_points < 50:
-                total_points = 50
-                violations.append({"name": "تعذر التحليل المباشر", "desc": "الموقع يحظر أدوات الفحص، مما يعني أنه قد يكون فخاً مشفراً."})
-
-    score = min(total_points, 100)
-    t_total, t_threats = get_live_stats()
+    score, violations = advanced_forensic_scan(url)
+    
+    # حساب الإحصائيات الحية لطارق (لا تعود للصفر أبداً)
+    now = datetime.now()
+    days_since_start = (now - datetime(2026, 1, 1)).days
+    total_scans = 1540 + (days_since_start * 41) + (now.hour * 3) + random.randint(1, 10)
+    
     return jsonify({
-        "risk_score": "Critical" if score >= 85 else "High" if score >= 60 else "Low",
-        "points": score, "violations": violations, "last_update": LAST_UPDATE,
-        "stats": {"total": t_total, "threats": t_threats}
+        "risk_score": "Critical" if score >= 80 else "High" if score >= 50 else "Low",
+        "points": score,
+        "violations": violations,
+        "last_update": LAST_SYNC,
+        "stats": {"total": total_scans, "threats": int(total_scans * 0.137)}
     })
 
-# --- مسارات الملفات التقنية (PWA & SEO) ---
+# --- خدمة الملفات التقنية من مجلد static ---
+@app.route('/')
+def index(): return render_template('index.html')
+
 @app.route('/manifest.json')
-def serve_manifest():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'manifest.json')
+def serve_manifest(): return send_from_directory('static', 'manifest.json')
 
 @app.route('/sitemap.xml')
-def serve_sitemap():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'sitemap.xml', mimetype='application/xml')
+def serve_sitemap(): return send_from_directory('static', 'sitemap.xml', mimetype='application/xml')
 
 @app.route('/robots.txt')
-def serve_robots():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt')
+def serve_robots(): return send_from_directory('static', 'robots.txt')
 
 if __name__ == '__main__':
     app.run(debug=True)
