@@ -1,9 +1,8 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "app.py", "use": "@vercel/python" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "app.py" }
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/static/sitemap.xml" },
+    { "source": "/robots.txt", "destination": "/static/robots.txt" },
+    { "source": "/manifest.json", "destination": "/static/manifest.json" },
+    { "source": "/sw.js", "destination": "/static/sw.js" }
   ]
 }
