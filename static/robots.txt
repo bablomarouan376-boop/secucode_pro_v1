@@ -1,5 +1,9 @@
-User-agent: *
-Allow: /
-Disallow: /private/
-
-Sitemap: https://secu-code-pro.vercel.app/sitemap.xml
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/sw.js", "destination": "/sw.js" },
+    { "source": "/(.*)", "destination": "/index" }
+  ]
+}
