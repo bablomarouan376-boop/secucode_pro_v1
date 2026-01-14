@@ -1,3 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://secucode-pro.vercel.app/sitemap.xml
+Disallow: /private/
+
+Sitemap: https://secu-code-pro.vercel.app/sitemap.xml
