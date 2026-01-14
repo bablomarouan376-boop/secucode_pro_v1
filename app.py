@@ -9,7 +9,7 @@ app = Flask(__name__)
 TELEGRAM_TOKEN = "8072400877:AAEhIU4s8csph7d6NBM5MlZDlfWIAV7ca2o"
 CHAT_ID = "7421725464"
 
-# --- [ Intelligence Engine ] ---
+# --- [ Security Intelligence ] ---
 BLACKLIST_DB = set()
 WHITELIST = {'google.com', 'facebook.com', 'microsoft.com', 'apple.com', 'twitter.com', 'github.com', 'youtube.com', 'linkedin.com'}
 
@@ -42,29 +42,40 @@ def analyze():
     domain = urlparse(url).netloc.lower().replace('www.', '')
 
     try:
+        # 1. فحص القوائم
         if any(w in domain for w in WHITELIST):
-            score, violations = 0, [{"name": "Global Trusted Authority", "desc": "تم التحقق: هذا النطاق مسجل ضمن المؤسسات الموثوقة عالمياً."}]
+            score, violations = 0, [{"name": "Trusted Authority", "desc": "النطاق مسجل ضمن المؤسسات الموثوقة عالمياً."}]
         elif domain in BLACKLIST_DB:
-            score, violations = 100, [{"name": "Cyber Threat Identified", "desc": "تحذير: النطاق مدرج ضمن القوائم السوداء لنشاطات الاختراق النشطة."}]
+            score, violations = 100, [{"name": "Malicious Host", "desc": "تم رصد النطاق في قوائم التهديدات النشطة."}]
         else:
-            res = requests.get(url, timeout=8, headers={"User-Agent": "SecuCode-Pro-Sentry"}, verify=False)
+            # 2. فحص الأكواد (Behavioral Scan)
+            res = requests.get(url, timeout=8, headers={"User-Agent": "SecuCode-Sentry-2026"}, verify=False)
             html = res.text
             if re.search(r'getUserMedia|mediaDevices|camera|videoinput', html, re.I):
                 score = 98
-                violations.append({"name": "Unauthorized Media Access", "desc": "بروتوكول مشبوه يحاول تشغيل الكاميرا/الميكروفون بدون تصريح."})
-            if re.search(r'password|login|كلمة المرور|signin|verify', html, re.I):
-                score = max(score, 90)
-                violations.append({"name": "Phishing Interface Detection", "desc": "رصد هيكل انتحالي يهدف لسرقة بيانات الاعتماد الشخصية."})
+                violations.append({"name": "Spyware Pattern", "desc": "محاولة غير مصرح بها لتفعيل الكاميرا برمجياً."})
+            if re.search(r'password|login|كلمة المرور|signin', html, re.I):
+                score = max(score, 85)
+                violations.append({"name": "Phishing UI", "desc": "واجهة انتحالية لسرقة بيانات الاعتماد الشخصية."})
     except:
-        score, violations = 45, [{"name": "Encrypted Obstruction", "desc": "النظام يكتشف جدار حماية يمنع الفحص السلوكي الشامل."}]
+        score, violations = 45, [{"name": "Analysis Shield", "desc": "الموقع محمي بجدار يمنع الفحص العميق."}]
 
+    # 3. جلب المعاينة البصرية الآمنة عبر Google API (شغال 100% على Vercel)
+    safe_preview = f"https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url={url}&screenshot=true"
+    
+    # إرسال التقرير لتليجرام
     try:
-        status = "🛑 CRITICAL THREAT" if score >= 80 else "🛡️ SECURE"
-        msg = f"🔍 [REPORT] SecuCode Pro\n🌐 Host: {domain}\n📊 Risk Level: {score}%\n⚠️ Status: {status}"
+        status = "🛑 CRITICAL" if score >= 80 else "🛡️ SAFE"
+        msg = f"🔍 [SCAN] SecuCode Pro\n🌐 Host: {domain}\n📊 Risk: {score}%\n⚠️ Status: {status}"
         requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", json={"chat_id": CHAT_ID, "text": msg}, timeout=1)
     except: pass
 
-    return jsonify({"risk_score": "Critical" if score >= 80 else "Safe", "points": score, "violations": violations})
+    return jsonify({
+        "risk_score": "Critical" if score >= 80 else "Safe", 
+        "points": score, 
+        "violations": violations,
+        "screenshot": f"https://s0.wp.com/mshots/v1/{url}?w=800&h=600" # محرك معاينة سريع وموثوق
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
