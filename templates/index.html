@@ -1,43 +1,58 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlTag">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecuCode Pro | طارق مصطفى</title>
-    <link rel="manifest" href="/manifest.json">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>SecuCode Pro | رادار طارق مصطفى</title>
+    <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+    <script src="https://unpkg.com/lucide@0.300.0/dist/umd/lucide.min.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background: #020617; color: white; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        body { font-family: 'Cairo', sans-serif; background: #020617; color: #f8fafc; }
+        .glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .scan-line { position: absolute; height: 3px; width: 100%; background: #3b82f6; animation: scan 2s linear infinite; box-shadow: 0 0 10px #3b82f6; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
-<body class="p-6">
+<body class="p-6 md:p-12 relative">
+    <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#0f172a,_#020617)]"></div>
+
     <main class="max-w-4xl mx-auto">
-        <header class="flex justify-between items-center mb-10">
-            <h1 class="text-4xl font-black italic uppercase">SECUCODE <span class="text-blue-600">PRO</span></h1>
-            <button onclick="toggleLang()" id="langBtn" class="bg-blue-600 px-6 py-2 rounded-full font-bold text-xs uppercase">English</button>
+        <header class="flex justify-between items-center mb-16">
+            <div>
+                <h1 class="text-5xl font-black italic text-white uppercase">SECUCODE <span class="text-blue-600">PRO</span></h1>
+                <p id="hero-sub" class="text-[11px] font-bold tracking-[0.3em] text-slate-400 uppercase mt-3">نظام طارق مصطفى للرصد الأمني - 2026</p>
+            </div>
+            <button onclick="toggleLang()" id="langBtn" class="bg-white/5 border border-white/20 px-6 py-2 text-xs font-black text-white rounded-full transition-all hover:bg-blue-600">English</button>
         </header>
 
-        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            <div class="glass p-5 rounded-3xl text-center">
-                <span id="label-total" class="text-[10px] text-slate-400 uppercase font-black">إجمالي الفحص</span>
-                <p id="totalScanned" class="text-2xl font-black text-blue-500 mt-2">--</p>
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+            <div class="glass p-5 rounded-3xl text-center border-b-4 border-blue-600/50">
+                <span id="stat-scans" class="text-[10px] font-black text-slate-400 uppercase">إجمالي الفحص</span>
+                <p id="totalScanned" class="text-2xl font-black text-blue-500 font-mono mt-2">--</p>
             </div>
-            <div class="glass p-5 rounded-3xl text-center">
-                <span id="label-threats" class="text-[10px] text-slate-400 uppercase font-black">تهديدات محجوبة</span>
-                <p id="threatsDetected" class="text-2xl font-black text-red-500 mt-2">--</p>
+            <div class="glass p-5 rounded-3xl text-center border-b-4 border-red-600/50">
+                <span id="stat-threats" class="text-[10px] font-black text-slate-400 uppercase">التهديدات المكتشفة</span>
+                <p id="threatsDetected" class="text-2xl font-black text-red-500 font-mono mt-2">--</p>
             </div>
-            </section>
+            <div class="glass p-5 rounded-3xl text-center border-b-4 border-green-600/50">
+                <span id="stat-acc" class="text-[10px] font-black text-slate-400 uppercase">الدقة</span>
+                <p class="text-2xl font-black text-green-500 mt-2">100%</p>
+            </div>
+            <div class="glass p-5 rounded-3xl text-center border-b-4 border-purple-600/50">
+                <span class="text-[10px] font-black text-purple-400 italic">LIVE SYNC</span>
+            </div>
+        </section>
 
-        <div class="glass p-4 rounded-[2rem] relative overflow-hidden mb-10">
-            <div class="flex flex-col md:flex-row gap-3">
-                <input type="url" id="urlInput" placeholder="أدخل الرابط للفحص..." class="w-full bg-transparent p-4 outline-none font-bold">
-                <button onclick="startAnalysis()" id="scanBtn" class="bg-blue-600 px-10 py-4 rounded-xl font-black">تحليل</button>
-            </div>
+        <div class="glass p-4 rounded-[2.5rem] mb-20 relative overflow-hidden flex flex-col md:flex-row gap-3">
+            <div id="scanLine" class="hidden scan-line"></div>
+            <input type="url" id="urlInput" placeholder="أدخل الرابط بالكامل هنا..." class="w-full bg-transparent px-6 py-4 outline-none font-bold text-lg text-white">
+            <button onclick="startScan()" id="scanBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl shadow-blue-600/20">
+                <i data-lucide="shield-check"></i> <span id="btn-text">تحليل الآن</span>
+            </button>
         </div>
 
-        <div id="resultsArea" class="hidden"></div>
+        <div id="resultsArea" class="hidden min-h-[300px] mb-20"></div>
     </main>
 
     <script type="module">
@@ -48,59 +63,64 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 1. جلب البيانات الأصلية من قاعدة البيانات فوراً
-        const statsRef = ref(db, 'stats');
-        onValue(statsRef, (snapshot) => {
-            const data = snapshot.val() || { clicks: 0, threats: 0 };
+        // ربط العدادات بفايربيز
+        onValue(ref(db, 'stats'), (s) => {
+            const data = s.val() || { clicks: 0, threats: 0 };
             document.getElementById('totalScanned').innerText = data.clicks.toLocaleString();
             document.getElementById('threatsDetected').innerText = data.threats.toLocaleString();
         });
 
-        // 2. الفحص وتحديث قاعدة البيانات الحقيقية
-        window.startAnalysis = async function() {
-            const url = document.getElementById('urlInput').value.trim();
-            if(!url) return;
-            
+        window.startScan = async function() {
+            const val = document.getElementById('urlInput').value.trim();
+            if(!val) return;
+            const btn = document.getElementById('scanBtn');
+            const line = document.getElementById('scanLine');
+            btn.disabled = true; line.classList.remove('hidden');
+
             try {
-                const response = await fetch('/analyze', {
+                const res = await fetch('/analyze', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ link: url })
+                    body: JSON.stringify({ link: val })
                 });
-                const data = await response.json();
+                const data = await res.json();
 
-                // تحديث Firebase الحقيقي (مش وهمي)
+                // تحديث قاعدة البيانات الحقيقية
                 runTransaction(ref(db, 'stats/clicks'), (c) => (c || 0) + 1);
-                if(data.risk_score === 'Critical') {
-                    runTransaction(ref(db, 'stats/threats'), (t) => (t || 0) + 1);
-                }
+                if(data.risk_score === 'Critical') runTransaction(ref(db, 'stats/threats'), (t) => (t || 0) + 1);
 
                 renderResults(data);
-            } catch (e) { console.error(e); }
+            } catch (e) { alert("Network Error"); }
+            finally { btn.disabled = false; line.classList.add('hidden'); }
         }
 
-        // 3. نظام تبديل اللغة (English/Arabic)
         let currentLang = 'ar';
         window.toggleLang = function() {
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
             const isEn = currentLang === 'en';
-            
-            document.documentElement.dir = isEn ? 'ltr' : 'rtl';
+            document.getElementById('htmlTag').dir = isEn ? 'ltr' : 'rtl';
             document.getElementById('langBtn').innerText = isEn ? 'العربية' : 'English';
-            document.getElementById('urlInput').placeholder = isEn ? 'Enter link for scan...' : 'أدخل الرابط للفحص...';
-            document.getElementById('scanBtn').innerText = isEn ? 'Analyze' : 'تحليل';
-            document.getElementById('label-total').innerText = isEn ? 'Total Scans' : 'إجمالي الفحص';
-            document.getElementById('label-threats').innerText = isEn ? 'Blocked Threats' : 'تهديدات محجوبة';
+            document.getElementById('hero-sub').innerText = isEn ? 'Tarek Mostafa Security Radar - 2026' : 'نظام طارق مصطفى للرصد الأمني - 2026';
+            document.getElementById('urlInput').placeholder = isEn ? 'Enter full URL here...' : 'أدخل الرابط بالكامل هنا...';
+            document.getElementById('btn-text').innerText = isEn ? 'Analyze Now' : 'تحليل الآن';
+            document.getElementById('stat-scans').innerText = isEn ? 'Total Scans' : 'إجمالي الفحص';
+            document.getElementById('stat-threats').innerText = isEn ? 'Threats Found' : 'التهديدات المكتشفة';
         }
 
         function renderResults(data) {
             const area = document.getElementById('resultsArea');
             area.classList.remove('hidden');
             const color = data.risk_score === 'Critical' ? '#ef4444' : '#22c55e';
-            area.innerHTML = `<div class="glass p-10 rounded-[3rem] border-r-[10px]" style="border-color:${color}">
-                <h2 class="text-5xl font-black" style="color:${color}">${data.risk_score}</h2>
-                <p class="mt-4 text-slate-400">${data.violations[0].desc}</p>
-            </div>`;
+            area.innerHTML = `
+                <div class="glass p-10 rounded-[3rem] border-r-[15px] shadow-2xl" style="border-color: ${color}">
+                    <h2 class="text-6xl font-black italic uppercase" style="color: ${color}">${data.risk_score}</h2>
+                    <p class="text-4xl font-black mt-4">${data.points}% Risk</p>
+                    <div class="mt-8 space-y-4">
+                        ${data.violations.map(v => `<div class="bg-white/5 p-6 rounded-2xl border border-white/5"><h4 class="font-black text-blue-500">${v.name}</h4><p class="text-slate-400 text-sm">${v.desc}</p></div>`).join('')}
+                    </div>
+                </div>`;
+            if(window.lucide) lucide.createIcons();
+            area.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
