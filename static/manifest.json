@@ -1,6 +1,26 @@
 {
-  "name": "SecuCode Pro",
+  "name": "SecuCode Pro | Elite Security",
   "short_name": "SecuCode",
-  "icons": [{"src": "/static/og-image.jpg", "sizes": "512x512", "type": "image/jpeg"}],
-  "start_url": "/", "display": "standalone", "theme_color": "#020617"
+  "description": "نظام طارق مصطفى المتطور لفحص الروابط بالذكاء الاصطناعي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    {
+      "src": "/static/og-image.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/og-image.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    }
+  ],
+  "categories": ["security", "utilities"]
 }
