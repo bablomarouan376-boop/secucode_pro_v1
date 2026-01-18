@@ -5,6 +5,3 @@ flask-limiter
 tldextract
 firebase_admin
 openai
-validators
-gunicorn
-urllib3
