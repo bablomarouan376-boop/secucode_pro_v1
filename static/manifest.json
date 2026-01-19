@@ -20,7 +20,24 @@
       "src": "/static/og-image.jpg",
       "sizes": "192x192",
       "type": "image/jpeg"
+    },
+    {
+      "src": "/static/og-image.jpg",
+      "sizes": "384x384",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/static/og-image.jpg",
+      "sizes": "144x144",
+      "type": "image/jpeg"
     }
   ],
-  "categories": ["security", "utilities"]
+  "categories": ["security", "utilities"],
+  "screenshots": [
+    {
+      "src": "/static/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ]
 }
