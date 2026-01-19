@@ -18,7 +18,7 @@ limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "5
 
 # Initialize Firebase (use your credentials)
 cred = credentials.Certificate(json.loads(os.environ.get("FIREBASE_CREDENTIALS")))  # Store JSON in env var
-initialize_app(cred, options={'databaseURL': 'https://flutter-ai-playground-2de28-default-rtdb.europe-west1.firebasedatabase.app'})
+initialize_app(cred, options={'databaseURL': 'https://secucode-pro-default-rtdb.firebaseio.com/'})
 
 # Environment variables for security
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
