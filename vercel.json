@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "tareq-secu-pro-final",
   "builds": [
     {
       "src": "app.py",
@@ -11,12 +12,5 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ],
-  "env": {
-    "TELEGRAM_TOKEN": "@telegram_token",
-    "CHAT_ID": "@chat_id",
-    "VIRUSTOTAL_API_KEY": "@virustotal_api_key",
-    "OPENAI_API_KEY": "@openai_api_key",
-    "FIREBASE_CREDENTIALS": "@firebase_credentials_json"
-  }
+  ]
 }
