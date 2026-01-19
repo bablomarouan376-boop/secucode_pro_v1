@@ -1,7 +1,6 @@
-# requirements.txt (Updated with new dependencies)
+# requirements.txt (محدث مع الإضافات الجديدة)
 flask
 requests
-flask-limiter
-tldextract
 firebase_admin
-openai
+tldextract  # لاستخراج النطاقات
+gunicorn  # للتشغيل على Vercel
