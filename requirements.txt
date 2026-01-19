@@ -1,6 +1,2 @@
-# requirements.txt (محدث مع الإضافات الجديدة)
 flask
 requests
-firebase_admin
-tldextract  # لاستخراج النطاقات
-gunicorn  # للتشغيل على Vercel
