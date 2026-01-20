@@ -2,38 +2,42 @@ import os, re, requests, time
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from urllib.parse import urlparse
 
-app = Flask(__name__)
+# إعداد التطبيق مع تحديد مجلد الملفات الثابتة بوضوح
+app = Flask(__name__, 
+            static_folder='static', 
+            static_url_path='/static',
+            template_folder='templates')
 
 # بيانات المطور: طارق مصطفى
 TELEGRAM_TOKEN = "8072400877:AAEhIU4s8csph7d6NBM5MlZDlfWIAV7ca2o"
 CHAT_ID = "7421725464"
 
-# 1. إصلاح مسارات الملفات الثابتة
+# 1. معالجة الملفات الثابتة الأساسية
 @app.route('/robots.txt')
-@app.route('/api/robots')
 def robots(): 
-    return send_from_directory('static', 'robots.txt')
+    return send_from_directory(app.static_folder, 'robots.txt')
 
 @app.route('/sitemap.xml')
-@app.route('/api/sitemap')
 def sitemap(): 
-    return send_from_directory('static', 'sitemap.xml')
+    return send_from_directory(app.static_folder, 'sitemap.xml')
 
 @app.route('/sw.js')
-@app.route('/api/sw')
 def sw(): 
-    return send_from_directory('static', 'sw.js')
+    return send_from_directory(app.static_folder, 'sw.js')
 
-# --- الجزء المضاف لحل مشكلة الصور ---
+# المسار السحري لحل مشكلة الـ 404 في الصور على Vercel
 @app.route('/static/<path:filename>')
 def serve_static(filename):
-    return send_from_directory('static', filename)
-# -----------------------------------
+    return send_from_directory(app.static_folder, filename)
 
 # 2. الواجهة الرئيسية
 @app.route('/')
-@app.route('/api/index')
 def index(): 
+    return render_template('index.html')
+
+# مسار إضافي لضمان عمل الـ Index في بيئة Vercel API
+@app.route('/api/index')
+def api_index():
     return render_template('index.html')
 
 @app.route('/analyze', methods=['POST'])
@@ -55,7 +59,7 @@ def analyze():
         if any(w in domain for w in WHITELIST):
             score, v_key = 0, "TRUSTED"
         else:
-            # فحص سلوكي
+            # فحص سلوكي مبسط
             res = requests.get(url, timeout=5, verify=False, headers={"User-Agent": "SecuCode-AI"})
             html = res.text
             if re.search(r'getUserMedia|camera|microphone', html, re.I):
@@ -67,12 +71,13 @@ def analyze():
     except:
         score, v_key = 45, "SHIELD"
 
-    # إشعار تليجرام
+    # إشعار تليجرام للمطور طارق مصطفى
     try:
         msg = f"🔍 [SCAN] {domain}\n📊 Risk: {score}%\n🛡️ Key: {v_key}"
         requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", 
                       json={"chat_id": CHAT_ID, "text": msg}, timeout=1)
-    except: pass
+    except: 
+        pass
 
     return jsonify({
         "risk_score": "Critical" if score >= 75 else "Safe",
@@ -82,4 +87,5 @@ def analyze():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # تشغيل السيرفر محلياً للتجربة
+    app.run(debug=True, port=5000)
