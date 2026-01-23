@@ -20,12 +20,12 @@
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; }
         .modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
         .modal.active { display: flex; opacity: 1; }
-        .glow-red { box-shadow: 0 0 40px rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4) !important; }
-        .glow-green { box-shadow: 0 0 40px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4) !important; }
         .scan-anim { position: absolute; width: 100%; height: 2px; background: var(--accent-blue); box-shadow: 0 0 15px var(--accent-blue); animation: scan-line 2.5s ease-in-out infinite; z-index: 10; }
         @keyframes scan-line { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         #toast { position: fixed; top: 20px; right: 20px; z-index: 10000; transform: translateX(150%); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #toast.active { transform: translateX(0); }
+        /* تصميم الورقة البيضاء للتقرير */
+        .white-report-paper { background: white !important; color: #0f172a !important; font-family: 'Inter', sans-serif; }
     </style>
 </head>
 <body class="cyber-grid p-4 md:p-8">
@@ -85,7 +85,7 @@
             <p id="loaderStatus" class="text-blue-500 font-black text-[10px] uppercase tracking-[0.3em]"></p>
         </div>
 
-        <div id="resultsArea" class="hidden space-y-6"></div>
+        <div id="resultsArea" class="hidden"></div>
 
         <footer class="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-slate-500 font-bold uppercase pb-8 border-t border-white/5">
             <div class="flex gap-8">
@@ -122,7 +122,7 @@
                 mPrivDesc: "عمليات الفحص مشفرة بالكامل. نحن نؤمن بأن الخصوصية حق إنساني أساسي.",
                 risk: "معامل الخطورة", mode: "محرك التحليل", resSafe: "نطاق موثوق", resCrit: "تهديد سيبراني",
                 OFFICIAL: "نطاق رسمي موثوق.", MALICIOUS: "خطر: تهديد أو تجسس مكتشف.", CLEAN: "نطاق سليم تقنياً.",
-                download: "تصدير تقرير PDF", watermark: "طارق مصطفى",
+                download: "تصدير تقرير PDF رسمي", watermark: "طارق مصطفى",
                 alertSafe: "نطاق آمن", alertDanger: "تحذير أمني", msgSafe: "تم التحقق من سلامة الرابط.", msgDanger: "تم رصد نشاط مشبوه أو تجسس!"
             },
             en: {
@@ -138,7 +138,7 @@
                 mPrivDesc: "All scans are end-to-end encrypted. We prioritize your privacy.",
                 risk: "RISK FACTOR", mode: "ENGINE", resSafe: "TRUSTED DOMAIN", resCrit: "CYBER THREAT",
                 OFFICIAL: "Official Trusted Domain.", MALICIOUS: "Danger: Malicious or Spyware detected.", CLEAN: "Technically clean domain.",
-                download: "Export PDF Report", watermark: "Tarek Mostafa",
+                download: "Export Official PDF", watermark: "Tarek Mostafa",
                 alertSafe: "Safe Domain", alertDanger: "Security Alert", msgSafe: "Link verified and safe.", msgDanger: "Suspicious activity or spyware detected!"
             }
         };
@@ -202,7 +202,6 @@
                     body: JSON.stringify({ link: url })
                 });
                 const result = await response.json();
-                
                 renderResults(result, url);
                 
                 const d = i18n[currentLang];
@@ -220,30 +219,88 @@
             area.classList.remove('hidden');
             const d = i18n[currentLang];
             const isCrit = data.is_blacklisted;
-            const isSafe = data.is_official;
-            const theme = isCrit ? 'var(--accent-red)' : (isSafe ? 'var(--accent-green)' : 'var(--accent-blue)');
+            const themeColor = isCrit ? '#e11d48' : (data.is_official ? '#059669' : '#2563eb');
             
+            // التقرير الاحترافي (الورقة البيضاء)
             area.innerHTML = `
-                <div id="captureArea" class="glass p-8 md:p-12 ${isCrit ? 'glow-red' : (isSafe ? 'glow-green' : '')}" style="border-top: 4px solid ${theme}">
-                    <div class="grid lg:grid-cols-5 gap-8">
-                        <div class="lg:col-span-3 space-y-6">
-                            <h2 class="text-3xl font-black italic uppercase" style="color: ${theme}">${isCrit ? d.resCrit : d.resSafe}</h2>
-                            <div class="bg-black/40 p-6 rounded-2xl border-r-8" style="border-color: ${theme}"><p class="text-white text-lg font-bold">${isSafe ? d.OFFICIAL : (isCrit ? d.MALICIOUS : d.CLEAN)}</p></div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="glass p-4 text-center"><span class="block text-[9px] mb-1 text-slate-500 uppercase">${d.risk}</span><span class="text-2xl font-black" style="color: ${theme}">${data.risk_score}%</span></div>
-                                <div class="glass p-4 text-center"><span class="block text-[9px] mb-1 text-slate-500 uppercase">${d.mode}</span><span class="text-[10px] font-black text-blue-500 uppercase">FORENSIC_V2</span></div>
-                            </div>
-                            <button onclick="downloadPDF()" class="w-full py-4 glass border-white/10 text-[10px] font-black uppercase hover:bg-blue-600/10 transition-all flex items-center justify-center gap-2">
-                                <i data-lucide="file-text" class="w-4 h-4"></i> ${d.download}
-                            </button>
+                <div id="captureArea" class="white-report-paper p-10 shadow-2xl rounded-sm relative overflow-hidden" style="min-height: 1000px; border-top: 8px solid ${themeColor}">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none">
+                        <h1 class="text-[120px] font-black -rotate-45">CONFIDENTIAL</h1>
+                    </div>
+
+                    <div class="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-8">
+                        <div>
+                            <h2 class="text-3xl font-black tracking-tighter uppercase text-slate-900">SecuCode <span class="text-blue-600">Pro</span></h2>
+                            <p class="text-[9px] font-black text-slate-500 tracking-widest uppercase">Official Forensic Investigation</p>
                         </div>
-                        <div class="lg:col-span-2">
-                            <div class="glass h-[240px] relative rounded-2xl overflow-hidden border-white/10">
-                                <div class="scan-anim"></div>
-                                <img src="${data.screenshot}" class="w-full h-full object-cover">
+                        <div class="text-right font-mono text-[10px] text-slate-600">
+                            REF: SC-${Date.now()}<br>
+                            DATE: ${data.timestamp || new Date().toLocaleString()}<br>
+                            EXPERT: TAREK MOSTAFA
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-10 mb-10">
+                        <div class="space-y-4">
+                            <h3 class="text-[10px] font-black bg-slate-900 text-white px-3 py-1 inline-block uppercase">1. Investigation Summary</h3>
+                            <table class="w-full text-[11px] border-collapse">
+                                <tr class="border-b"><td class="py-2 font-bold text-slate-500 italic">Target Domain:</td><td class="py-2 font-black text-blue-700">${url}</td></tr>
+                                <tr class="border-b"><td class="py-2 font-bold text-slate-500 italic">Server IP:</td><td class="py-2 font-mono">${data.server?.ip || '0.0.0.0'}</td></tr>
+                                <tr class="border-b"><td class="py-2 font-bold text-slate-500 italic">Geolocation:</td><td class="py-2">${data.server?.country || 'Unknown'}</td></tr>
+                            </table>
+                        </div>
+                        <div class="flex flex-col items-center justify-center bg-slate-50 border-2 border-slate-100 rounded-xl p-6">
+                            <p class="text-[10px] font-black text-slate-400 mb-2 uppercase">Verdict</p>
+                            <div class="text-5xl font-black" style="color: ${themeColor}">${isCrit ? 'CRITICAL' : 'SECURE'}</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-10">
+                        <h3 class="text-[10px] font-black bg-slate-900 text-white px-3 py-1 inline-block uppercase mb-4">2. Evidence Snapshot</h3>
+                        <div class="border-4 border-slate-900 relative bg-slate-100 overflow-hidden">
+                            <div class="scan-anim opacity-20"></div>
+                            <img src="${data.screenshot}" class="w-full h-64 object-cover grayscale-[30%]">
+                        </div>
+                    </div>
+
+                    <div class="mb-10">
+                        <h3 class="text-[10px] font-black bg-slate-900 text-white px-3 py-1 inline-block uppercase mb-4">3. Threat Intelligence</h3>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="border p-4 rounded bg-white">
+                                <p class="text-[9px] font-bold text-slate-400 mb-3 uppercase tracking-widest italic">Engine Diagnostics</p>
+                                ${data.details ? data.details.map(d => `
+                                    <div class="flex justify-between text-[10px] border-b py-1">
+                                        <span class="font-mono text-slate-600">${d.engine}</span>
+                                        <span class="font-black ${d.result === 'clean' ? 'text-green-600' : 'text-red-600'} uppercase">${d.result}</span>
+                                    </div>
+                                `).join('') : '<p class="text-[10px]">No Engine Data</p>'}
+                            </div>
+                            <div class="text-center flex flex-col justify-center border rounded bg-slate-50">
+                                <p class="text-[10px] font-black text-slate-400 uppercase">Risk Level</p>
+                                <div class="text-5xl font-black text-slate-900">${data.risk_score}%</div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-20 pt-8 border-t flex justify-between items-end">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 border-4 border-blue-600/10 rounded-full flex items-center justify-center opacity-30">
+                                <i data-lucide="shield-check" class="text-blue-600"></i>
+                            </div>
+                            <p class="text-[8px] font-mono text-slate-400 uppercase italic leading-tight">Security Hash:<br>${btoa(url).slice(0,24)}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black italic text-slate-900 mb-1">Tarek Mostafa Core</p>
+                            <div class="h-0.5 w-32 bg-slate-900 ml-auto"></div>
+                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Lead Forensic Analyst</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center mt-8 pb-10">
+                    <button onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center gap-3 transition-all">
+                        <i data-lucide="download"></i> ${d.download}
+                    </button>
                 </div>`;
             
             lucide.createIcons();
@@ -253,10 +310,13 @@
         window.downloadPDF = async function() {
             const { jsPDF } = window.jspdf;
             const element = document.getElementById('captureArea');
-            const canvas = await html2canvas(element, { backgroundColor: '#020617', scale: 2 });
-            const pdf = new jsPDF('l', 'mm', 'a4');
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 10, 277, 150);
-            pdf.save(`SECU_REPORT_${Date.now()}.pdf`);
+            const canvas = await html2canvas(element, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`SECU_PRO_REPORT_${Date.now()}.pdf`);
         };
 
         window.openScanner = async function() {
