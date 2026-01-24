@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SecuCode Pro | Forensic Security Analysis</title>
     
-    <link rel="icon" type="image/jpeg" href="https://raw.githubusercontent.com/bablomarouan376-boop/secu-code-pro/main/static/og-image.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -21,32 +20,21 @@
         .modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
         .modal.active { display: flex; opacity: 1; }
         
-        /* تصميم الورقة الرسمية المخفية (للطباعة فقط) */
+        /* تصميم الورقة الرسمية المخفية للطباعة */
         #official-print-template {
             width: 210mm; 
             background: white !important;
             color: #000 !important;
             position: absolute;
-            left: -9999px; /* مخفي عن المستخدم */
+            left: -9999px; 
             padding: 15mm;
-            font-family: 'Inter', 'Cairo', sans-serif;
+            z-index: -1;
         }
         .paper-border { border: 2px solid #000; padding: 10px; min-height: 270mm; position: relative; }
-        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 100px; font-weight: 900; color: rgba(0,0,0,0.03); pointer-events: none; z-index: 0; white-space: nowrap; }
-        
-        #toast { position: fixed; top: 20px; right: 20px; z-index: 10000; transform: translateX(150%); transition: 0.5s; }
-        #toast.active { transform: translateX(0); }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; font-weight: 900; color: rgba(0,0,0,0.03); pointer-events: none; white-space: nowrap; }
     </style>
 </head>
 <body class="cyber-grid p-4 md:p-8">
-
-    <div id="toast" class="glass px-6 py-4 flex items-center gap-4 border-l-4 border-l-blue-500 min-w-[300px]">
-        <div id="toast-icon"></div>
-        <div>
-            <p id="toast-title" class="font-black text-xs uppercase tracking-widest"></p>
-            <p id="toast-msg" class="text-[10px] text-slate-400 font-bold"></p>
-        </div>
-    </div>
 
     <main class="max-w-6xl mx-auto space-y-6">
         <header class="flex flex-col md:flex-row justify-between items-center gap-6 glass p-6 border-b border-blue-500/20 shadow-2xl">
@@ -59,7 +47,7 @@
                     <p id="txt-hero-sub" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest"></p>
                 </div>
             </div>
-            <button onclick="toggleLang()" id="langBtn" class="px-6 py-2 glass text-[10px] font-black uppercase tracking-widest border-white/5 hover:bg-blue-600/10 transition-all"></button>
+            <button onclick="toggleLang()" id="langBtn" class="px-6 py-2 glass text-[10px] font-black uppercase tracking-widest border-white/5 hover:bg-blue-600/10 transition-all">English</button>
         </header>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -69,14 +57,14 @@
             <div class="glass p-5 flex items-center justify-center"><span id="txt-status" class="px-4 py-1.5 bg-blue-600/10 text-blue-400 text-[9px] font-black rounded-full uppercase border border-blue-500/20 animate-pulse"></span></div>
         </div>
 
-        <section class="glass p-8 md:p-12 border border-white/5 text-center space-y-8">
+        <section class="glass p-8 md:p-12 text-center space-y-8">
             <div class="space-y-2">
                 <h2 id="txt-input-label" class="text-xs font-black text-blue-500 uppercase tracking-[0.5em]"></h2>
                 <p id="txt-input-sub" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest"></p>
             </div>
-            <div class="relative group max-w-3xl mx-auto">
-                <input type="text" id="urlInput" class="w-full bg-black/40 border border-white/10 p-6 pr-20 rounded-2xl focus:border-blue-600 transition-all font-mono text-left outline-none" placeholder="example-domain.com">
-                <button onclick="openScanner()" class="absolute right-3 top-1/2 -translate-y-1/2 p-4 bg-blue-600/10 border border-blue-500/20 rounded-xl hover:bg-blue-600/20">
+            <div class="relative group max-w-3xl mx-auto font-mono">
+                <input type="text" id="urlInput" dir="ltr" class="w-full bg-black/40 border border-white/10 p-6 pr-20 rounded-2xl focus:border-blue-600 transition-all text-left outline-none" placeholder="https://example.com">
+                <button onclick="openScanner()" class="absolute right-3 top-1/2 -translate-y-1/2 p-4 bg-blue-600/10 border border-blue-500/20 rounded-xl">
                     <i data-lucide="qr-code" class="w-6 h-6 text-blue-400"></i>
                 </button>
             </div>
@@ -84,11 +72,11 @@
                 <button onclick="runAnalysis()" id="scanBtn" class="bg-blue-600 hover:bg-blue-700 py-5 rounded-xl font-black text-[11px] uppercase flex items-center justify-center gap-3 shadow-lg">
                     <i data-lucide="shield-search"></i> <span id="txt-scan-btn"></span>
                 </button>
-                <button onclick="clearInput()" id="txt-clear" class="bg-white/5 border border-white/10 py-5 rounded-xl font-black text-[11px] uppercase text-slate-400 hover:bg-white/10"></button>
+                <button onclick="clearInput()" id="txt-clear" class="bg-white/5 border border-white/10 py-5 rounded-xl font-black text-[11px] uppercase text-slate-400"></button>
             </div>
         </section>
 
-        <div id="loader" class="hidden glass p-16 text-center animate-pulse">
+        <div id="loader" class="hidden glass p-16 text-center">
             <div class="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-6"></div>
             <p id="loaderStatus" class="text-blue-500 font-black text-[10px] uppercase tracking-[0.3em]"></p>
         </div>
@@ -96,9 +84,7 @@
         <div id="resultsArea" class="hidden space-y-6"></div>
 
         <div id="official-print-template">
-            <div class="paper-border" id="printable-content">
-                <div class="watermark uppercase">Confidential</div>
-                </div>
+            <div class="paper-border" id="printable-content"></div>
         </div>
 
         <footer class="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-slate-500 font-bold uppercase pb-8 border-t border-white/5">
@@ -110,9 +96,9 @@
         </footer>
     </main>
 
-    <div id="scannerModal" class="modal"><div class="glass p-6 w-full max-w-sm mx-4"><div id="reader" class="rounded-xl overflow-hidden"></div><button onclick="closeScanner()" id="txt-close-cam" class="w-full mt-6 py-4 bg-red-600/10 text-red-500 font-black text-[10px] uppercase rounded-xl"></button></div></div>
-    <div id="aboutModal" class="modal"><div class="glass p-10 max-w-lg mx-4 space-y-6"><h2 id="txt-m-about-title" class="text-2xl font-black text-blue-500 uppercase italic"></h2><p id="txt-m-about-desc" class="text-slate-300 text-sm leading-relaxed"></p><button onclick="closeModal('aboutModal')" class="btn-close w-full py-4 bg-white/5 rounded-xl text-[10px] font-black uppercase border border-white/10">Back</button></div></div>
-    <div id="privModal" class="modal"><div class="glass p-10 max-w-lg mx-4 space-y-6"><h2 id="txt-m-priv-title" class="text-2xl font-black text-red-500 uppercase italic"></h2><p id="txt-m-priv-desc" class="text-slate-300 text-sm leading-relaxed"></p><button onclick="closeModal('privModal')" class="btn-close w-full py-4 bg-white/5 rounded-xl text-[10px] font-black uppercase border border-white/10">Back</button></div></div>
+    <div id="scannerModal" class="modal"><div class="glass p-6 w-full max-w-sm mx-4"><div id="reader"></div><button onclick="closeScanner()" id="txt-close-cam" class="w-full mt-6 py-4 bg-red-600/10 text-red-500 font-black text-[10px] uppercase rounded-xl"></button></div></div>
+    <div id="aboutModal" class="modal"><div class="glass p-10 max-w-lg mx-4 space-y-6"><h2 id="txt-m-about-title" class="text-2xl font-black text-blue-500 uppercase italic"></h2><p id="txt-m-about-desc" class="text-slate-300 text-sm leading-relaxed"></p><button onclick="closeModal('aboutModal')" class="w-full py-4 bg-white/5 rounded-xl text-[10px] font-black uppercase">Back</button></div></div>
+    <div id="privModal" class="modal"><div class="glass p-10 max-w-lg mx-4 space-y-6"><h2 id="txt-m-priv-title" class="text-2xl font-black text-red-500 uppercase italic"></h2><p id="txt-m-priv-desc" class="text-slate-300 text-sm leading-relaxed"></p><button onclick="closeModal('privModal')" class="w-full py-4 bg-white/5 rounded-xl text-[10px] font-black uppercase">Back</button></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -127,38 +113,34 @@
                 hero: "المطور الرئيسي: طارق مصطفى • تحديث 2026",
                 total: "إجمالي الفحوصات", threats: "التهديدات المكتشفة", acc: "دقة التحليل", status: "النظام: نشط",
                 inputLabel: "وحدة تحليل النواقل الرقمية", inputSub: "نظام الاستخبارات السيبرانية - طارق مصطفى",
-                btn: "بدء فحص النطاق", clear: "تطهير النواقل", loading: "يتم الآن مطابقة البيانات سحابياً...",
-                closeCam: "إغلاق الكاميرا", about: "حول النظام", priv: "الخصوصية",
-                copy: "© 2026 SecuCode Pro • طارق مصطفى",
-                mAboutTitle: "بروتوكول SecuCode Pro",
-                mAboutDesc: "نظام استخباراتي تم تطويره بواسطة طارق مصطفى لفحص وتأمين الروابط الرقمية باستخدام تقنيات التحليل الجنائي.",
-                mPrivTitle: "تشفير البيانات",
-                mPrivDesc: "عمليات الفحص مشفرة بالكامل. نحن نؤمن بأن الخصوصية حق إنساني أساسي.",
-                download: "تصدير تقرير PDF رسمي", alertSafe: "نطاق آمن", alertDanger: "تحذير أمني"
+                btn: "بدء فحص النطاق", clear: "تطهير", loading: "مزامنة البيانات العالمية...",
+                closeCam: "إغلاق", about: "حول", priv: "الخصوصية", copy: "© 2026 SecuCode Pro • طارق مصطفى",
+                mAboutTitle: "بروتوكول SecuCode Pro", mAboutDesc: "نظام فحص روابط متقدم مطور بواسطة طارق مصطفى.",
+                mPrivTitle: "تشفير البيانات", mPrivDesc: "جميع الفحوصات مشفرة بالكامل لضمان الخصوصية.",
+                download: "تصدير تقرير PDF رسمي", risk: "معدل الخطورة", ip: "عنوان الخادم", country: "الموقع"
             },
             en: {
                 hero: "Lead Dev: Tarek Mostafa • 2026 Intel",
                 total: "TOTAL SCANS", threats: "THREATS BLOCKED", acc: "ACCURACY", status: "SYSTEM: ACTIVE",
                 inputLabel: "DIGITAL VECTOR ANALYSIS", inputSub: "CYBER INTEL CORE - TAREK MOSTAFA",
-                btn: "SCAN DOMAIN NOW", clear: "PURGE", loading: "Cross-referencing global cloud databases...",
-                closeCam: "Close Camera", about: "PROTOCOL", priv: "PRIVACY",
-                copy: "© 2026 SecuCode Pro • Tarek Mostafa",
-                mAboutTitle: "SecuCode Pro Protocol",
-                mAboutDesc: "Forensic intelligence system developed by Tarek Mostafa for digital link verification.",
-                mPrivTitle: "Encryption",
-                mPrivDesc: "All scans are end-to-end encrypted.",
-                download: "Export Official PDF", alertSafe: "Safe Domain", alertDanger: "Security Alert"
+                btn: "SCAN DOMAIN NOW", clear: "PURGE", loading: "Cross-referencing global databases...",
+                closeCam: "Close", about: "PROTOCOL", priv: "PRIVACY", copy: "© 2026 SecuCode Pro • Tarek Mostafa",
+                mAboutTitle: "SecuCode Pro Protocol", mAboutDesc: "Advanced forensic link verification system.",
+                mPrivTitle: "Encryption", mPrivDesc: "End-to-end encrypted scans for privacy.",
+                download: "Export Official PDF", risk: "Risk Level", ip: "Server IP", country: "Location"
             }
         };
 
         let currentLang = 'ar';
-        let html5QrCode;
+        let lastResult = null; // تخزين آخر نتيجة للتبديل اللغوي السريع
 
         window.toggleLang = () => {
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
             const d = i18n[currentLang];
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'English' : 'العربية';
+            
+            // تحديث النصوص الثابتة
             document.getElementById('txt-hero-sub').innerText = d.hero;
             document.getElementById('txt-total-lbl').innerText = d.total;
             document.getElementById('txt-threats-lbl').innerText = d.threats;
@@ -177,10 +159,14 @@
             document.getElementById('txt-m-about-desc').innerText = d.mAboutDesc;
             document.getElementById('txt-m-priv-title').innerText = d.mPrivTitle;
             document.getElementById('txt-m-priv-desc').innerText = d.mPrivDesc;
+            
+            // إعادة رسم النتائج إذا كانت موجودة لمنع اختفائها
+            if(lastResult) renderResults(lastResult.data, lastResult.url);
+            
             lucide.createIcons();
         };
 
-        window.toggleLang();
+        window.toggleLang(); // تشغيل أولي
 
         window.runAnalysis = async function() {
             const input = document.getElementById('urlInput');
@@ -196,10 +182,11 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ link: url })
                 });
-                const result = await response.json();
-                renderResults(result, url);
+                const data = await response.json();
+                lastResult = { data, url }; // حفظ النتيجة
+                renderResults(data, url);
             } catch (e) {
-                alert("Connection error");
+                console.error(e);
             } finally {
                 document.getElementById('loader').classList.add('hidden');
             }
@@ -207,68 +194,82 @@
 
         function renderResults(data, url) {
             const area = document.getElementById('resultsArea');
-            area.classList.remove('hidden');
             const d = i18n[currentLang];
             const isCrit = data.is_blacklisted;
             const themeColor = isCrit ? '#ef4444' : '#10b981';
 
-            // أولاً: ما يظهر في واجهة الموقع (التصميم المودرن)
+            area.classList.remove('hidden');
+            
+            // الجزء الأول: واجهة الموقع
             area.innerHTML = `
-                <div class="glass p-8 border-l-4" style="border-color: ${themeColor}">
-                    <div class="flex justify-between items-center">
+                <div class="glass p-6 md:p-10 border-l-4 shadow-2xl animate-in fade-in" style="border-color: ${themeColor}">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
-                            <h3 class="text-2xl font-black uppercase" style="color: ${themeColor}">${isCrit ? 'Threat Detected' : 'Safe Domain'}</h3>
-                            <p class="text-slate-400 text-xs mt-1 uppercase font-bold tracking-widest">Analysis complete for: ${url}</p>
+                            <h3 class="text-2xl font-black uppercase" style="color: ${themeColor}">
+                                ${isCrit ? (currentLang === 'ar' ? 'تهديد أمني مكتشف' : 'Threat Detected') : (currentLang === 'ar' ? 'نطاق آمن وموثوق' : 'Safe Domain')}
+                            </h3>
+                            <p class="text-slate-400 font-mono text-xs mt-2">${url}</p>
                         </div>
-                        <button onclick="downloadOfficialReport()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-black text-[10px] uppercase flex items-center gap-2">
+                        <button onclick="downloadOfficialReport()" class="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-black text-[10px] uppercase flex items-center gap-2 shadow-xl">
                             <i data-lucide="printer" class="w-4 h-4"></i> ${d.download}
                         </button>
                     </div>
-                </div>`;
 
-            // ثانياً: تعبئة "الورقة الحقيقية" المخفية ببيانات احترافية
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+                        <div class="p-6 bg-white/5 rounded-2xl border border-white/5">
+                            <p class="text-[10px] text-slate-500 font-black mb-1 uppercase">${d.risk}</p>
+                            <span class="text-3xl font-black font-mono" style="color: ${themeColor}">${data.risk_score}%</span>
+                        </div>
+                        <div class="p-6 bg-white/5 rounded-2xl border border-white/5">
+                            <p class="text-[10px] text-slate-500 font-black mb-1 uppercase">${d.ip}</p>
+                            <span class="text-lg font-black font-mono">${data.server.ip}</span>
+                        </div>
+                        <div class="p-6 bg-white/5 rounded-2xl border border-white/5">
+                            <p class="text-[10px] text-slate-500 font-black mb-1 uppercase">${d.country}</p>
+                            <span class="text-lg font-black">${data.server.country}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // الجزء الثاني: تجهيز الورقة الرسمية في الخلفية
             document.getElementById('printable-content').innerHTML = `
                 <div class="watermark uppercase">Verified by Tarek</div>
                 <div style="display:flex; justify-content:space-between; border-bottom:3px solid #000; padding-bottom:15px; margin-bottom:30px;">
-                    <div>
-                        <h1 style="font-size:24pt; font-weight:900; margin:0;">SECUCODE <span style="color:#2563eb;">PRO</span></h1>
+                    <div style="text-align:left;">
+                        <h1 style="font-size:24pt; font-weight:900; margin:0; color:#000;">SECUCODE <span style="color:#2563eb;">PRO</span></h1>
                         <p style="font-size:8pt; letter-spacing:3px; font-weight:bold; color:#666; margin:0;">CYBER FORENSIC INVESTIGATION REPORT</p>
                     </div>
-                    <div style="text-align:right; font-family:monospace; font-size:9pt;">
+                    <div style="text-align:right; font-family:monospace; font-size:9pt; color:#000;">
                         REF: SC-${Date.now()}<br>
-                        DATE: ${new Date().toLocaleString()}<br>
+                        DATE: ${data.timestamp}<br>
                         OPERATOR: TAREK MOSTAFA
                     </div>
                 </div>
 
-                <div style="margin-bottom:30px;">
+                <div style="color:#000;">
                     <h2 style="font-size:14pt; border-left:5px solid #000; padding-left:10px; margin-bottom:15px; text-transform:uppercase;">1. Investigation Summary</h2>
-                    <table style="width:100%; font-size:11pt; border-collapse:collapse;">
-                        <tr style="border-bottom:1px solid #ddd;"><td style="padding:8px; font-weight:bold; color:#444;">Target URL</td><td style="padding:8px; font-family:monospace;">${url}</td></tr>
-                        <tr style="border-bottom:1px solid #ddd;"><td style="padding:8px; font-weight:bold; color:#444;">Server IP</td><td style="padding:8px;">${data.server?.ip || '0.0.0.0'}</td></tr>
-                        <tr style="border-bottom:1px solid #ddd;"><td style="padding:8px; font-weight:bold; color:#444;">Geolocation</td><td style="padding:8px;">${data.server?.country || 'Unknown'}</td></tr>
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
+                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px; font-weight:bold; width:30%;">Target URL</td><td style="padding:10px; font-family:monospace;">${url}</td></tr>
+                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px; font-weight:bold;">Security Risk</td><td style="padding:10px; color:${themeColor}; font-weight:900;">${data.risk_score}%</td></tr>
+                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px; font-weight:bold;">Server IP</td><td style="padding:10px;">${data.server.ip}</td></tr>
                     </table>
-                </div>
 
-                <div style="margin-bottom:30px;">
                     <h2 style="font-size:14pt; border-left:5px solid #000; padding-left:10px; margin-bottom:15px; text-transform:uppercase;">2. Analysis Verdict</h2>
-                    <div style="padding:25px; border:2px solid #000; text-align:center; background:#f8fafc;">
+                    <div style="padding:30px; border:2px solid #000; text-align:center; background:#f8fafc; margin-bottom:30px;">
                         <h3 style="font-size:35pt; font-weight:900; margin:0; color:${themeColor};">${isCrit ? 'CRITICAL' : 'CLEAN'}</h3>
-                        <p style="font-weight:bold; margin-top:10px;">Security Risk Level: ${data.risk_score}%</p>
+                        <p style="font-weight:bold; margin-top:10px;">The system has identified this vector as ${isCrit ? 'dangerous' : 'secure'}.</p>
                     </div>
-                </div>
 
-                <div style="margin-bottom:30px;">
-                    <h2 style="font-size:14pt; border-left:5px solid #000; padding-left:10px; margin-bottom:15px; text-transform:uppercase;">3. Evidence Log</h2>
+                    <h2 style="font-size:14pt; border-left:5px solid #000; padding-left:10px; margin-bottom:15px; text-transform:uppercase;">3. Evidence Capture</h2>
                     <div style="border:1px solid #ccc; padding:5px; background:#fff;">
-                        <img src="${data.screenshot}" style="width:100%; border:1px solid #eee;">
-                        <p style="font-size:8pt; text-align:center; margin-top:5px; color:#666; font-style:italic;">Capture ID: ${Math.random().toString(36).substring(7).toUpperCase()}</p>
+                        <img src="${data.screenshot}" style="width:100%; min-height:200px;">
                     </div>
                 </div>
 
-                <div style="margin-top:auto; padding-top:50px; display:flex; justify-content:space-between; align-items:flex-end;">
-                    <div style="border:3px double #2563eb; color:#2563eb; padding:10px; font-weight:black; transform:rotate(-15deg); font-size:12pt;">CERTIFIED BY TAREK</div>
-                    <div style="text-align:right;">
+                <div style="margin-top:auto; padding-top:60px; display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div style="border:3px double #2563eb; color:#2563eb; padding:10px; font-weight:black; transform:rotate(-15deg); font-size:12pt; opacity:0.7;">CERTIFIED UNIT</div>
+                    <div style="text-align:right; color:#000;">
                         <p style="font-weight:900; font-size:14pt; margin:0;">Tarek Mostafa Core</p>
                         <div style="height:2px; width:200px; background:#000; margin:5px 0;"></div>
                         <p style="font-size:8pt; font-weight:bold; color:#666;">LEAD FORENSIC ANALYST</p>
@@ -283,42 +284,37 @@
         window.downloadOfficialReport = async function() {
             const { jsPDF } = window.jspdf;
             const element = document.getElementById('official-print-template');
-            
-            // إظهار الورقة مؤقتاً للتصوير
-            element.style.left = "0";
+            element.style.left = "0"; // إظهار مؤقت للتصوير
             
             const canvas = await html2canvas(element, { scale: 2, useCORS: true });
             const imgData = canvas.toDataURL('image/png');
             
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            const pW = pdf.internal.pageSize.getWidth();
+            const pH = (canvas.height * pW) / canvas.width;
             
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.addImage(imgData, 'PNG', 0, 0, pW, pH);
             pdf.save(`Forensic_Report_${Date.now()}.pdf`);
             
-            // إعادة إخفاء الورقة
-            element.style.left = "-9999px";
+            element.style.left = "-9999px"; // إخفاء مرة أخرى
         };
 
-        window.openScanner = async function() {
+        window.openScanner = () => {
             document.getElementById('scannerModal').classList.add('active');
-            html5QrCode = new Html5Qrcode("reader");
-            await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
+            let qr = new Html5Qrcode("reader");
+            qr.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
                 document.getElementById('urlInput').value = txt;
-                closeScanner(); runAnalysis();
-            }).catch(() => closeScanner());
+                qr.stop(); document.getElementById('scannerModal').classList.remove('active');
+                runAnalysis();
+            }).catch(() => {});
         };
 
-        window.closeScanner = () => {
-            if(html5QrCode) html5QrCode.stop().finally(() => document.getElementById('scannerModal').classList.remove('active'));
-            else document.getElementById('scannerModal').classList.remove('active');
-        };
-
+        window.closeScanner = () => document.getElementById('scannerModal').classList.remove('active');
         window.clearInput = () => document.getElementById('urlInput').value = '';
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
 
+        // تحديث إحصائيات Firebase
         onValue(ref(db, 'stats'), (s) => {
             const v = s.val() || { clicks: 0, threats: 0 };
             document.getElementById('totalScanned').innerText = v.clicks.toString().padStart(4, '0');
