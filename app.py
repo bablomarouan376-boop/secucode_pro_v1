@@ -2,8 +2,8 @@ import os
 import requests
 import base64
 import urllib3
-import socket  # إضافة لجلب الـ IP
-import time    # إضافة للتوقيت
+import socket
+import time
 from flask import Flask, request, jsonify, render_template
 from urllib.parse import urlparse
 import firebase_admin
@@ -32,10 +32,10 @@ WHITELIST_DOMAINS = [
 ]
 
 def get_server_forensics(domain):
-    """جلب بيانات الخادم الجنائية لعرضها في الورقة البيضاء"""
+    """جلب بيانات الخادم الجنائية"""
     try:
         ip = socket.gethostbyname(domain)
-        # جلب الدولة والشركة المستضيفة عبر API مجاني
+        # جلب الدولة والشركة المستضيفة عبر API
         geo = requests.get(f"https://ipapi.co/{ip}/json/", timeout=5).json()
         return {
             "ip": ip,
@@ -43,10 +43,10 @@ def get_server_forensics(domain):
             "org": geo.get("org", "Private Provider")
         }
     except:
-        return {"ip": "0.0.0.0", "country": "Protected/Proxy", "org": "CDN/Private"}
+        return {"ip": "0.0.0.0", "country": "Unknown", "org": "CDN/Private"}
 
 def get_vt_analysis(url):
-    """تحليل مطور لجلب تفاصيل المحركات (Details Matrix)"""
+    """تحليل مطور لجلب تفاصيل المحركات"""
     try:
         url_id = base64.urlsafe_b64encode(url.encode()).decode().strip("=")
         headers = {"x-apikey": VT_API_KEY}
@@ -55,26 +55,10 @@ def get_vt_analysis(url):
         if res.status_code == 200:
             attr = res.json()['data']['attributes']
             stats = attr['last_analysis_stats']
-            results = attr['last_analysis_results']
-            
-            # استخراج قائمة بـ 6 محركات فحص لزيادة قوة التقرير
-            details = []
-            for engine, data in results.items():
-                if data['category'] in ['malicious', 'phishing']:
-                    details.append({"engine": engine, "result": data['result']})
-                if len(details) >= 6: break
-            
-            # إذا كان الموقع نظيفاً، أضف محركات شهيرة كدليل
-            if not details:
-                details = [
-                    {"engine": "Kaspersky", "result": "clean"},
-                    {"engine": "Symantec", "result": "clean"},
-                    {"engine": "Google Safebrowsing", "result": "clean"}
-                ]
-            return stats, details
-        return None, []
+            return stats
+        return None
     except:
-        return None, []
+        return None
 
 def check_spyware_behavior(url, domain):
     if any(d in domain for d in WHITELIST_DOMAINS): return False
@@ -99,18 +83,12 @@ def analyze():
     url = raw_url if raw_url.startswith('http') else 'https://' + raw_url
     domain = urlparse(url).netloc.lower() or url
     
-    # 1. تحليل الخادم (Forensics)
     server_info = get_server_forensics(domain)
-    
-    # 2. تحليل الاستخبارات (VT & Details)
-    vt_stats, engine_details = get_vt_analysis(url)
+    vt_stats = get_vt_analysis(url)
     m_count = vt_stats.get('malicious', 0) if vt_stats else 0
     p_count = vt_stats.get('phishing', 0) if vt_stats else 0
-    
-    # 3. الفحص السلوكي
     spy_detected = check_spyware_behavior(url, domain)
     
-    # منطق التقرير
     is_official = any(d in domain for d in WHITELIST_DOMAINS)
     is_blacklisted = False
     risk_score = 0
@@ -123,13 +101,11 @@ def analyze():
             is_blacklisted = True
             risk_score = max(risk_score, 90)
 
-    # تحديث Firebase
     try:
         db.reference('stats/clicks').transaction(lambda c: (c or 0) + 1)
-        if is_blacklisted: db.reference('stats/threats').transaction(lambda t: (t or 0) + 1)
+        if is_blacklisted: db.reference('stats/threats').transaction(lambda t: (t or 0) + t)
     except: pass
 
-    # إرسال تلجرام
     try:
         icon = "🔴" if is_blacklisted else "🟢"
         msg = f"{icon} *SecuCode Scan*\nDomain: `{domain}`\nRisk: {risk_score}%\nIP: {server_info['ip']}"
@@ -137,15 +113,11 @@ def analyze():
                       json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
     except: pass
 
-    # إرجاع كافة البيانات المطلوبة للورقة البيضاء
     return jsonify({
         "is_official": is_official,
         "is_blacklisted": is_blacklisted,
         "risk_score": risk_score,
-        "spy_detected": spy_detected,
-        "engines_found": m_count + p_count,
-        "details": engine_details,        # مصفوفة المحركات (مهمة للتقرير)
-        "server": server_info,             # بيانات الخادم (مهمة للتقرير)
+        "server": server_info,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "screenshot": f"https://s0.wp.com/mshots/v1/{url}?w=800&h=600"
     })
