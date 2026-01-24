@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Cairo', Arial; color: #000; background: #fff; }
+        .a4-page { width: 210mm; min-height: 297mm; padding: 20mm; }
+        /* باقي الـ CSS من قبل */
+    </style>
+</head>
+<body>
+    <div class="a4-page">
+        <header>
+            <img src="{{ data.logo }}" alt="SecuCode Pro">
+            <h1>{% if lang == 'ar' %}تقرير SecuCode Pro{% else %}SecuCode Pro Report{% endif %}</h1>
+        </header>
+        <!-- باقي التقرير مع {{ data.risk_score }} إلخ -->
+        <section>
+            <h2>{{ i18n.report.summary }}</h2>
+            <!-- ... -->
+        </section>
+    </div>
+</body>
+</html>
