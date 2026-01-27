@@ -3,22 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { font-family: 'Cairo', Arial; color: #000; background: #fff; }
-        .a4-page { width: 210mm; min-height: 297mm; padding: 20mm; }
-        /* باقي الـ CSS من قبل */
+        @page {
+            size: a4;
+            margin: 1.5cm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 9pt;
+            }
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        .header {
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 26pt;
+            font-weight: bold;
+            color: #0f172a;
+        }
+        .status-banner {
+            padding: 20pt;
+            border-radius: 10pt;
+            text-align: center;
+            margin-bottom: 25pt;
+        }
+        .danger {
+            background-color: #fef2f2;
+            border: 1pt solid #ef4444;
+            color: #991b1b;
+        }
+        .safe {
+            background-color: #f0fdf4;
+            border: 1pt solid #22c55e;
+            color: #166534;
+        }
+        .section-title {
+            background: #f8fafc;
+            padding: 8pt;
+            font-weight: bold;
+            border-left: 5pt solid #3b82f6;
+            margin-top: 20pt;
+            font-size: 12pt;
+        }
+        table {
+            width: 100%;
+            margin-top: 10pt;
+            border-collapse: collapse;
+        }
+        td {
+            padding: 10pt;
+            border-bottom: 0.5pt solid #e2e8f0;
+            font-size: 10pt;
+        }
+        .footer {
+            text-align: center;
+            font-size: 8pt;
+            color: #94a3b8;
+            margin-top: 50pt;
+            border-top: 0.5pt solid #e2e8f0;
+            padding-top: 10pt;
+        }
     </style>
 </head>
 <body>
-    <div class="a4-page">
-        <header>
-            <img src="{{ data.logo }}" alt="SecuCode Pro">
-            <h1>{% if lang == 'ar' %}تقرير SecuCode Pro{% else %}SecuCode Pro Report{% endif %}</h1>
-        </header>
-        <!-- باقي التقرير مع {{ data.risk_score }} إلخ -->
-        <section>
-            <h2>{{ i18n.report.summary }}</h2>
-            <!-- ... -->
-        </section>
+    <div class="header">
+        <span style="float: right; color: #ef4444; font-size: 9pt; font-weight: bold;">CLASSIFIED: SECURITY AUDIT</span>
+        <div class="logo">SecuCode <span style="color:#3b82f6">Pro</span></div>
+    </div>
+
+    <div class="status-banner {{ 'danger' if data.is_blacklisted else 'safe' }}">
+        <h1 style="margin:0;">{{ 'THREAT ANALYSIS: CRITICAL' if data.is_blacklisted else 'THREAT ANALYSIS: SECURE' }}</h1>
+        <p style="font-size: 14pt;">Confidence Score: {{ 100 - data.risk_score }}% | Risk Score: {{ data.risk_score }}%</p>
+    </div>
+
+    <div class="section-title">Forensic Identification</div>
+    <table>
+        <tr>
+            <td><strong>Target Host/IP</strong></td>
+            <td>{{ data.server.ip }}</td>
+        </tr>
+        <tr>
+            <td><strong>Geographic Origin</strong></td>
+            <td>{{ data.server.country }}</td>
+        </tr>
+        <tr>
+            <td><strong>Organization</strong></td>
+            <td>{{ data.server.org }}</td>
+        </tr>
+        <tr>
+            <td><strong>Timestamp</strong></td>
+            <td>{{ data.timestamp }}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Deep Analysis Findings</div>
+    <p style="font-size: 11pt;">
+        {% if data.is_blacklisted %}
+        The automated forensic engine has identified high-risk indicators. This domain is currently flagged in global threat intelligence databases (VirusTotal/Cyber-Intel). Access is <strong>Strictly Restricted</strong>.
+        {% else %}
+        The domain has passed all security heuristic checks. No malicious signatures were found. The connection to this host is considered <strong>Verified and Safe</strong>.
+        {% endif %}
+    </p>
+
+    <div class="footer">
+        SecuCode Pro Forensic System - Intel Core i7-vPro Optimized <br>
+        Lead Developer: Tarek Mostafa - 2026 Audit Report
     </div>
 </body>
 </html>
